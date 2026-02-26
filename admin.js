@@ -1,5 +1,5 @@
 // CHANGE THIS to your Render/Railway link after you deploy the backend
-const BASE_URL = "http://localhost:3000"; 
+const BASE_URL = "https://quickbite-canteen.onrender.com"; 
 
 function checkAccess() {
     const auth = sessionStorage.getItem('adminAuth');
