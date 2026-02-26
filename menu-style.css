@@ -1,4 +1,4 @@
-/* Animated Background Logic */
+/* This creates the dim overlay */
 .full-screen-bg {
     height: 100vh;
     width: 100%;
@@ -7,8 +7,10 @@
     align-items: center;
     position: relative;
     background: rgba(0, 0, 0, 0.4); 
+    overflow: hidden;
 }
 
+/* This creates the sliding images */
 .full-screen-bg::before {
     content: "";
     position: absolute;
