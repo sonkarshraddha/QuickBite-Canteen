@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout | College Canteen</title>
+    <link rel="stylesheet" href="cart.css">
+</head>
+<body>
+    <div class="full-screen-bg">
+        <div class="cart-container">
+            <div class="cart-header">
+                <h2>Review Your Order</h2>
+                <button class="btn-cancel" onclick="cancelOrder()">Cancel Order</button>
+            </div>
+            
+            <div id="cart-items-wrapper">
+                <table class="cart-table">
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th>Qty</th>
+                            <th>Price</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cart-body">
+                        </tbody>
+                </table>
+            </div>
+
+            <button class="btn-add-more" onclick="window.location.href='index.html'">+ Add More Items</button>
+
+            <div class="summary-card">
+                <div class="summary-line"><span>Subtotal:</span> <span id="subtotal">₹0</span></div>
+                <div class="summary-line"><span>GST (5%):</span> <span id="gst">₹0</span></div>
+                <div class="summary-line"><span>Service Tax:</span> <span>₹5</span></div>
+                <hr>
+                <div class="summary-line total"><span>Total Payable:</span> <span id="total-payable">₹0</span></div>
+                
+                <button class="btn-proceed" onclick="proceedToPayment()">
+                    Proceed with Payment
+                </button>
+            </div>
+        </div>
+    </div>
+    <script src="cart.js"></script>
+</body>
+</html>

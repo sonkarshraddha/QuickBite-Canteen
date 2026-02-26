@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Confirmed | QuickBite</title>
+    <link rel="stylesheet" href="menu-style.css">
+</head>
+<body>
+    <div class="menu-bg"></div>
+    <div class="success-card" style="background: white; width: 90%; max-width: 400px; padding: 40px; border-radius: 25px; text-align: center; margin: 100px auto; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+        <h1 style="color: #27ae60;">✔</h1>
+        <h2>Order Confirmed!</h2>
+        <p>Show this at the counter to collect your food.</p>
+
+        <div style="background: #f1fcf4; border: 2px dashed #27ae60; padding: 20px; border-radius: 15px; margin: 20px 0;">
+            <span style="font-size: 12px; color: #636e72;">YOUR TOKEN / TABLE</span>
+            <span style="font-size: 3rem; font-weight: bold; color: #27ae60; display: block;" id="display-token">--</span>
+        </div>
+
+        <a href="menu.html" class="confirm-btn" style="text-decoration: none; display: block; background: #d63031; color: white; padding: 15px; border-radius: 12px; font-weight: bold;">Back to Menu</a>
+    </div>
+
+    <script>
+        window.onload = function() {
+            const token = localStorage.getItem('customToken') || "N/A";
+            const amount = localStorage.getItem('totalPrice') || "0";
+            const items = JSON.parse(localStorage.getItem('canteenCart')) || [];
+            const method = localStorage.getItem('payMethod') || "Online";
+
+            document.getElementById('display-token').innerText = token;
+
+            // SAVE TO ADMIN LIST
+            let allOrders = JSON.parse(localStorage.getItem('allOrders')) || [];
+            allOrders.push({
+                token: token,
+                amount: amount,
+                items: items,
+                method: method,
+                time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+                status: "Pending"
+            });
+            localStorage.setItem('allOrders', JSON.stringify(allOrders));
+
+            // Clear cart for next order
+            localStorage.removeItem('canteenCart');
+
+            window.onload = function() {
+    // 1. Get the master list of all orders, or start an empty one
+    let allOrders = JSON.parse(localStorage.getItem('allOrders')) || [];
+
+    // 2. Collect the current student's data
+    const currentOrder = {
+        token: localStorage.getItem('customToken') || "N/A",
+        amount: localStorage.getItem('totalPrice') || "0",
+        method: localStorage.getItem('payMethod') || "online",
+        items: JSON.parse(localStorage.getItem('canteenCart')) || [],
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        status: "Pending"
+    };
+
+    // 3. Add this order to the master list
+    allOrders.push(currentOrder);
+
+    // 4. Save the master list back to the browser's memory
+    localStorage.setItem('allOrders', JSON.stringify(allOrders));
+
+    // 5. Update the UI for the student
+    document.getElementById('display-token').innerText = currentOrder.token;
+
+    // 6. Clear the student's cart for their next order
+    localStorage.removeItem('canteenCart');
+
+window.onload = function() {
+    // 1. Get the list of all orders, or create an empty one if it's the first order
+    let allOrders = JSON.parse(localStorage.getItem('allOrders')) || [];
+
+    // 2. Capture the current order details from the student's session
+    const newOrder = {
+        token: localStorage.getItem('customToken') || "N/A",
+        amount: localStorage.getItem('totalPrice') || "0",
+        method: localStorage.getItem('payMethod') || "online", 
+        items: JSON.parse(localStorage.getItem('canteenCart')) || [],
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        status: "Pending" // This is what shows up on the admin panel
+    };
+
+    // 3. Add this order to the master list
+    allOrders.push(newOrder);
+
+    // 4. Save the master list back to the browser's memory
+    localStorage.setItem('allOrders', JSON.stringify(allOrders));
+
+    // 5. Update the UI for the student
+    document.getElementById('display-token').innerText = newOrder.token;
+
+    // 6. Clear the cart so the student can start fresh next time
+    localStorage.removeItem('canteenCart');
+};
+
+window.onload = function() {
+    // 1. Capture the data immediately
+    const token = localStorage.getItem('customToken') || "N/A";
+    const total = localStorage.getItem('totalPrice') || "0";
+    const method = localStorage.getItem('payMethod') || "Online";
+    const cart = JSON.parse(localStorage.getItem('canteenCart')) || [];
+    const timeNow = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+    // 2. Build the order object
+    const newOrder = {
+        token: token,
+        amount: total,
+        method: method,
+        items: cart, // Ensure this is the full array
+        time: timeNow,
+        status: "Pending"
+    };
+
+    // 3. Push to the cumulative list
+    let allOrders = JSON.parse(localStorage.getItem('allOrders')) || [];
+    allOrders.push(newOrder);
+    localStorage.setItem('allOrders', JSON.stringify(allOrders));
+
+    // 4. Update the Success Page UI
+    document.getElementById('display-token').innerText = token;
+    // Add this line to show time on the success page itself
+    document.getElementById('display-time').innerText = timeNow; 
+
+
+
+    window.onload = function() {
+    // 1. Capture order details from memory
+    const cart = JSON.parse(localStorage.getItem('canteenCart')) || [];
+    const total = localStorage.getItem('totalPrice') || "0";
+    const token = localStorage.getItem('customToken') || "N/A";
+    const method = localStorage.getItem('payMethod') || "Online";
+
+    // 2. Format the order object
+    const newOrder = {
+        token: token,
+        amount: total,
+        method: method,
+        items: cart, // This captures the food names
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        status: "Pending"
+    };
+
+    // 3. Add to the cumulative list (The "Bridge" to Admin)
+    let allOrders = JSON.parse(localStorage.getItem('allOrders')) || [];
+    allOrders.push(newOrder);
+    localStorage.setItem('allOrders', JSON.stringify(allOrders));
+
+    // 4. Update UI labels
+    document.getElementById('display-token').innerText = token;
+};
+};  
+};
+        };
+    </script>
+</body>
+</html>

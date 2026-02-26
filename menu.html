@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuickBite | Menu</title>
+    <link rel="stylesheet" href="menu-style.css">
+</head>
+<body>
+    <div class="menu-bg"></div>
+
+    <div class="content-wrapper">
+        <header>
+            <h1>QuickBite Menu 🍛</h1>
+            <p>Fresh food from your canteen</p>
+        </header>
+
+        <div class="menu-grid">
+            <div class="food-card">
+                <img src="idli.jpg.png" alt="Dosa Idli">
+                <div class="card-info">
+                    <h3>South Indian Combo</h3>
+                    <p>Idli, Dosa & Medu Vada</p>
+                    <span class="price">₹60</span>
+                    <button class="add-btn">Add +</button>
+                </div>
+            </div>
+
+            <div class="food-card">
+                <img src="n.jpg.png" alt="Noodles">
+                <div class="card-info">
+                    <h3>Veg Hakka Noodles</h3>
+                    <p>Spicy & Loaded with Veggies</p>
+                    <span class="price">₹80</span>
+                    <button class="add-btn">Add +</button>
+                </div>
+            </div>
+
+            <div class="food-card">
+                <img src="r.jpg.png" alt="Rice Bowl">
+                <div class="card-info">
+                    <h3>Veg Fried Rice</h3>
+                    <p>Authentic Basmati Rice</p>
+                    <span class="price">₹70</span>
+                    <button class="add-btn">Add +</button>
+            
+            <div id="cart-bar" class="cart-hidden">
+                 <div class="cart-info-bottom">
+                  <span>Items in Cart: <b id="cart-count">0</b></span>
+                  <span>Total: <b>₹<span id="total-price">0</span></b></span>
+                 </div>
+             <button class="checkout-btn">View Cart & Checkout</button>
+                 </div>
+
+    <script src="cart.js"></script>
+
+                    <div id="ai-bot-container">
+    <div id="chat-window" class="chat-hidden">
+        <div class="chat-header">
+            <span>Quickie AI 🤖</span>
+            <button onclick="toggleChat()">×</button>
+        </div>
+        <div id="chat-body">
+            <p class="bot-msg">Hi! I'm Quickie. How can I help you eat today?</p>
+        </div>
+        <div class="chat-input">
+            <input type="text" id="user-input" placeholder="Ask me something...">
+            <button onclick="sendMessage()">Send</button>
+
+
+            <div id="cart-bar" class="cart-hidden">
+    <span>Items: <b id="cart-count">0</b></span>
+    <span>Total: <b>₹<span id="total-price">0</span></b></span>
+    <button class="checkout-btn">View Cart & Checkout</button>
+</div>
+        </div>
+    </div>
+    <div id="chat-bubble" onclick="toggleChat()">
+        💬
+    </div>
+</div>
+<script src="bot.js"></script>
+<script src="menu.js"></script>
+<script>
+    let cart = [];
+    let total = 0;
+
+    function addToCart(itemName, price) {
+        cart.push(itemName); // Adds "Veg Fried Rice", etc.
+        total += price;
+
+        // Save to bridge
+        localStorage.setItem('cart', JSON.stringify(cart));
+        localStorage.setItem('totalPrice', total.toString());
+        
+        // Update the UI button/counter if you have one
+        console.log("Cart updated:", cart);
+    }
+</script>
+<button onclick="addToCart('Veg Hakka Noodles', 80)">Add to Tray</button>
+
+<button onclick="addToCart('Veg Fried Rice', 90)">Add to Tray</button>
+
+
+
+
+ 
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
