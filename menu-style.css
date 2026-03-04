@@ -1,5 +1,17 @@
-/* This creates the dim overlay */
+/* --- Master QuickBite Styles --- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
+body {
+    font-family: 'Poppins', sans-serif;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* Moving Background Logic */
 .full-screen-bg {
     height: 100vh;
     width: 100%;
@@ -7,27 +19,9 @@
     justify-content: center;
     align-items: center;
     position: relative;
-    background: rgba(0, 0, 0, 0.4); 
-    overflow: hidden;
-}
-/* This creates the consistent "Card" container */
-.login-popup, .cart-container, .payment-box, .success-card {
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
-    padding: 40px;
-    border-radius: 25px;
-    box-shadow: 0 15px 35px rgba(0,0,0,0.3);
-    width: 380px; /* Adjust if you want them wider */
-    text-align: center;
-    z-index: 10;
-    animation: popUp 0.5s ease-out;
+    background: rgba(0, 0, 0, 0.5); /* Dims the background images */
 }
 
-@keyframes popUp {
-    0% { transform: scale(0.8); opacity: 0; }
-    100% { transform: scale(1); opacity: 1; }
-}
-/* This creates the sliding images */
 .full-screen-bg::before {
     content: "";
     position: absolute;
@@ -37,7 +31,7 @@
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    background-image: url('r.jpg.png'); 
+    background-image: url('r.jpg.png'); /* Initial image */
     animation: backgroundChange 12s infinite;
 }
 
@@ -45,4 +39,42 @@
     0%, 100% { background-image: url('r.jpg.png'); }
     33% { background-image: url('n.jpg.png'); }
     66% { background-image: url('u.jpg.png'); }
+}
+
+/* The White Card Look */
+.login-popup, .cart-container, .payment-box, .success-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    padding: 40px;
+    border-radius: 25px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+    width: 380px;
+    text-align: center;
+    z-index: 10;
+    animation: popUp 0.5s ease-out;
+}
+
+@keyframes popUp {
+    0% { transform: scale(0.8); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* Common form styles */
+input {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+}
+
+button {
+    width: 100%;
+    padding: 12px;
+    background: #ff4757;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
 }

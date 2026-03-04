@@ -3,37 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QuickBite | Happy Ordering</title>
-   <link rel="stylesheet" href="menu-style.css">
+    <title>QuickBite | Login</title>
+    <link rel="stylesheet" href="menu-style.css">
 </head>
 <body>
     <div class="full-screen-bg">
         <div class="login-popup">
-            <form class="login-form" id="loginForm">
-                <div class="icon">🍱</div>
-                <h2>QuickBite Login</h2>
-                <p>Hungry? Log in with your college ID</p>
+            <form id="loginForm">
+                <div style="font-size: 40px;">🍱</div>
+                <h2 style="color: #ff4757;">QuickBite Login</h2>
+                <p>Log in with your college ID</p>
                 
                 <input type="email" id="email" placeholder="College Email" required>
                 <input type="password" id="password" placeholder="Password" required>
                 
                 <button type="submit">Let's Eat! 🚀</button>
-                
-                <p class="college-note">
-                    Reset passwords via the <b>College Portal</b>.
+                <p style="margin-top: 15px; font-size: 14px;">
+                    Don't have an account? <a href="register.html">Register here</a>
                 </p>
-                <p>Don't have an account? <a href="register.html">Register here</a></p>
-
-                <footer style="margin-top: 50px; text-align: center;">
-                    <p style="color: #636e72; font-size: 12px;">© 2026 QuickBite Canteen</p>
-                    <a href="admin.html" style="text-decoration: none; color: transparent; cursor: default;">.</a>
-                </footer>
-            </form> 
-        </div> 
+            </form>
+        </div>
     </div>
-
-    <script src="cart.js"></script>
-    <script src="bot.js"></script>
     <script src="auth.js"></script>
 </body>
 </html>
