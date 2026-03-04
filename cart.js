@@ -1,64 +1,63 @@
-let cartCount = 0;
-let totalPrice = 0;
-
-const cartBar = document.getElementById('cart-bar');
-const cartCountDisplay = document.getElementById('cart-count');
-const totalPriceDisplay = document.getElementById('total-price');
-
-// Select all "Add +" buttons
-const addButtons = document.querySelectorAll('.add-btn');
-
-addButtons.forEach(button => {
-    button.addEventListener('click', () => {
-        // 1. Get the price from the card (removes the '₹' symbol)
-        const priceText = button.parentElement.querySelector('.price').innerText;
-        const price = parseInt(priceText.replace('₹', ''));
-
-        // 2. Update logic
-        cartCount++;
+// Wait for DOM to load
+document.addEventListener('DOMContentLoaded', function() {
+    const cartBar = document.getElementById('cart-bar');
+    const cartCountDisplay = document.getElementById('cart-count');
+    const totalPriceDisplay = document.getElementById('total-price');
+    
+    // Initialize cart from localStorage
+    let cart = JSON.parse(localStorage.getItem('canteenCart')) || [];
+    let totalPrice = parseFloat(localStorage.getItem('totalPrice')) || 0;
+    
+    // Update display
+    updateCartDisplay();
+    
+    // Make addToCart function global
+    window.addToCart = function(itemName, price) {
+        // Add to cart array
+        cart.push({ name: itemName, price: price });
         totalPrice += price;
-
-        // 3. Update the display
-        cartCountDisplay.innerText = cartCount;
-        totalPriceDisplay.innerText = totalPrice;
-
-        // 4. Show the cart bar if it's hidden
-        if (cartCount > 0) {
+        
+        // Save to localStorage
+        localStorage.setItem('canteenCart', JSON.stringify(cart));
+        localStorage.setItem('totalPrice', totalPrice.toString());
+        
+        // Update display
+        updateCartDisplay();
+        
+        // Show cart bar if hidden
+        if (cartBar) {
             cartBar.classList.remove('cart-hidden');
         }
-
-        // Optional: Animation feedback on the button
-        button.innerText = "Added!";
-        button.style.backgroundColor = "#2ecc71";
-        setTimeout(() => {
-            button.innerText = "Add +";
-            button.style.backgroundColor = "#d63031";
-        }, 800);
-    });
-});
-
-// ... existing variables (cartCount, totalPrice) ...
-
-// Select the checkout button
-const checkoutBtn = document.querySelector('.checkout-btn');
-
-checkoutBtn.addEventListener('click', () => {
-    // 1. Save current cart data so the next page can read it
-    localStorage.setItem('cartCount', cartCount);
-    localStorage.setItem('totalPrice', totalPrice);
-
-    // 2. Redirect to the checkout page
-    window.location.href = "checkout.html";
-});
-
-// Update your existing addButtons loop to ensure data is saved immediately
-addButtons.forEach(button => {
-    button.addEventListener('click', () => {
-        // ... your existing price extraction and display logic ...
         
-        // Optional: Save progress in case of page refresh
-        localStorage.setItem('cartCount', cartCount);
-        localStorage.setItem('totalPrice', totalPrice);
-    });
+        // Button animation
+        event.target.innerText = "Added!";
+        event.target.style.backgroundColor = "#2ecc71";
+        setTimeout(() => {
+            event.target.innerText = "Add +";
+            event.target.style.backgroundColor = "#d63031";
+        }, 800);
+    };
+    
+    function updateCartDisplay() {
+        if (cartCountDisplay) cartCountDisplay.innerText = cart.length;
+        if (totalPriceDisplay) totalPriceDisplay.innerText = totalPrice;
+        
+        // Show/hide cart bar
+        if (cartBar) {
+            if (cart.length > 0) {
+                cartBar.classList.remove('cart-hidden');
+            } else {
+                cartBar.classList.add('cart-hidden');
+            }
+        }
+    }
+    
+    // Make clearTray function global
+    window.clearTray = function() {
+        cart = [];
+        totalPrice = 0;
+        localStorage.removeItem('canteenCart');
+        localStorage.setItem('totalPrice', '0');
+        updateCartDisplay();
+    };
 });
-

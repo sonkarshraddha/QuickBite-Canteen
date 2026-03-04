@@ -1,43 +1,55 @@
-// CHANGE THIS to your Render/Railway link after you deploy the backend
-const BASE_URL = "https://quickbite-canteen.onrender.com"; 
+const BASE_URL = "http://localhost:3000"; // Change to your Render URL when deployed
 
-let selectedMethod = ""; 
+let selectedMethod = "";
 
-function selectOnline() {
+// Make these functions global
+window.selectOnline = function() {
     selectedMethod = "online";
-    document.querySelectorAll('.payment-card').forEach(c => c.classList.remove('selected'));
     document.getElementById('online-option').classList.add('selected');
-}
+    document.getElementById('counter-option').classList.remove('selected');
+};
 
-function selectCounter() {
+window.selectCounter = function() {
     selectedMethod = "counter";
-    document.querySelectorAll('.payment-card').forEach(c => c.classList.remove('selected'));
     document.getElementById('counter-option').classList.add('selected');
-}
+    document.getElementById('online-option').classList.remove('selected');
+};
 
-async function confirmOrder() {
+window.confirmOrder = async function() {
     const tokenInput = document.getElementById('student-token');
     const btn = document.getElementById('main-btn');
-    const totalAmount = localStorage.getItem('totalPrice') || "0";
+    
+    // Get cart data
+    const cart = JSON.parse(localStorage.getItem('canteenCart')) || [];
+    const totalAmount = parseFloat(localStorage.getItem('totalPrice')) || 0;
 
-    if (!tokenInput || !tokenInput.value.trim()) return alert("Please enter Table/Token Number!");
-    if (!selectedMethod) return alert("Please select a payment method!");
+    if (!tokenInput || !tokenInput.value.trim()) {
+        alert("Please enter Table/Token Number!");
+        return;
+    }
+    if (!selectedMethod) {
+        alert("Please select a payment method!");
+        return;
+    }
+    if (cart.length === 0) {
+        alert("Your cart is empty!");
+        return;
+    }
 
     btn.innerText = "Sending Order...";
     btn.disabled = true;
 
     const orderData = {
         customerName: localStorage.getItem('userName') || "Student",
-        email: localStorage.getItem('userEmail') || "vpt-student@vpt.edu.in",
-        items: JSON.parse(localStorage.getItem('cart')) || [], 
-        totalAmount: parseFloat(totalAmount),
+        email: localStorage.getItem('userEmail') || "student@college.edu",
+        items: cart,
+        totalAmount: totalAmount,
         tableNumber: tokenInput.value,
         method: selectedMethod,
         status: "Pending"
     };
 
     try {
-        // Using the BASE_URL for cloud compatibility
         const res = await fetch(`${BASE_URL}/place-order`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
@@ -45,25 +57,33 @@ async function confirmOrder() {
         });
 
         if (res.ok) {
-            localStorage.removeItem('cart');
-            localStorage.setItem('totalPrice', '0');
+            // Save token for success page
+            localStorage.setItem('customToken', tokenInput.value);
+            localStorage.setItem('payMethod', selectedMethod);
             
             if (selectedMethod === "online") {
-                window.location.href = `upi://pay?pa=canteen@upi&pn=QuickBite&am=${totalAmount}&cu=INR`;
-                setTimeout(() => { window.location.href = "success.html"; }, 3000);
+                // Simulate UPI payment (in real app, redirect to UPI app)
+                alert("Redirecting to UPI app...");
+                setTimeout(() => { 
+                    window.location.href = "success.html"; 
+                }, 2000);
             } else {
                 window.location.href = "success.html";
             }
+        } else {
+            throw new Error('Order failed');
         }
     } catch (err) {
         console.error("Order Error:", err);
-        alert("Server Error! If you just deployed, wait 1 minute for the server to wake up.");
+        alert("Server Error! Make sure the backend is running.");
         btn.innerText = "Confirm & Pay";
         btn.disabled = false;
     }
-}
+};
 
-window.onload = () => {
+// Load total on page load
+window.onload = function() {
     const total = localStorage.getItem('totalPrice') || "0";
-    if(document.getElementById('pay-total')) document.getElementById('pay-total').innerText = total;
+    const totalElement = document.getElementById('pay-total');
+    if (totalElement) totalElement.innerText = total;
 };
