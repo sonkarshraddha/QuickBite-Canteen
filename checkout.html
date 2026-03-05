@@ -4,73 +4,62 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QuickBite | Checkout</title>
-    <link rel="stylesheet" href="menu-style.css">
-    <style>
-        body {
-            margin: 0; font-family: 'Segoe UI', sans-serif;
-            display: flex; justify-content: center; align-items: center; min-height: 100vh;
-        }
-        .payment-box {
-            background: white; max-width: 450px; width: 90%; padding: 30px;
-            border-radius: 25px; text-align: center; box-shadow: 0 15px 35px rgba(0,0,0,0.2);
-            position: relative; z-index: 10;
-        }
-        .student-info { margin: 20px 0; }
-        #student-token {
-            width: 100%; padding: 12px; border: 2px solid #d63031;
-            border-radius: 12px; text-align: center; font-size: 1.1rem; outline: none;
-        }
-        .total-banner {
-            background: #fff5f5; padding: 15px; border-radius: 12px; margin-bottom: 25px;
-        }
-        .pay-option {
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 15px; border: 2px solid #eee; border-radius: 15px;
-            margin-bottom: 15px; cursor: pointer; transition: 0.3s;
-        }
-        .pay-option.selected { border-color: #d63031; background: #fffafa; }
-        .confirm-btn {
-            width: 100%; padding: 15px; background: #d63031; color: white;
-            border: none; border-radius: 12px; font-size: 1.1rem; font-weight: bold; cursor: pointer;
-        }
-        .confirm-btn:disabled { background: #636e72; cursor: not-allowed; }
-    </style>
+    <link rel="stylesheet" href="checkout.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-    <div class="menu-bg"></div>
     <div class="payment-box">
-        <h2>Checkout 💳</h2>
+        <h2><i class="fas fa-credit-card"></i> Checkout</h2>
+        
+        <!-- Order Summary -->
+        <div class="order-summary" id="order-summary">
+            <h3><i class="fas fa-shopping-bag"></i> Your Order</h3>
+            <div class="order-items" id="order-items-list">
+                <!-- Items will be populated by JS -->
+            </div>
+            <div class="order-total">
+                <span>Total Amount:</span>
+                <span>₹<span id="pay-total">0</span></span>
+            </div>
+        </div>
         
         <div class="student-info">
-            <label style="display: block; font-size: 14px; color: #636e72; margin-bottom: 8px; font-weight: bold;">
-                Enter Token / Table Number:
+            <label>
+                <i class="fas fa-id-card"></i> Enter Token / Table Number:
             </label>
-            <input type="text" id="student-token" placeholder="e.g. 101 or Table 5">
+            <input type="text" id="student-token" placeholder="e.g. 101 or Table 5" maxlength="20">
         </div>
 
-        <div class="total-banner">
-            <p>Amount to Pay: <b style="font-size: 1.5rem; color: #d63031;">₹<span id="pay-total">0</span></b></p>
-        </div>
-
-        <div class="pay-option" id="online-option" onclick="selectOnline()">
-            <div style="text-align: left;">
-                <span style="font-weight: bold;">📱 Online UPI</span><br>
-                <small style="color: #636e72;">GPay, Paytm, PhonePe, FamPay</small>
+        <div class="pay-option" id="online-option" onclick="selectPaymentMethod('online')">
+            <div class="pay-option-left">
+                <span>📱 Online UPI</span>
+                <small>GPay, Paytm, PhonePe, FamPay</small>
             </div>
-            <span>➔</span>
+            <i class="fas fa-chevron-right" style="color: #d63031;"></i>
         </div>
 
-        <div class="pay-option" id="counter-option" onclick="selectCounter()">
-            <div style="text-align: left;">
-                <span style="font-weight: bold;">💵 Pay at Counter</span><br>
-                <small style="color: #636e72;">Cash or Physical QR</small>
+        <div class="pay-option" id="counter-option" onclick="selectPaymentMethod('counter')">
+            <div class="pay-option-left">
+                <span>💵 Pay at Counter</span>
+                <small>Cash or Physical QR</small>
             </div>
-            <span>➔</span>
+            <i class="fas fa-chevron-right" style="color: #d63031;"></i>
         </div>
 
-        <button class="confirm-btn" id="main-btn" onclick="confirmOrder()">Confirm & Pay</button>
-        <p style="margin-top: 15px;"><a href="menu.html" style="color: #636e72; text-decoration: none;">← Back to Menu</a></p>
+        <!-- Success Message -->
+        <div class="success-message" id="success-message">
+            <i class="fas fa-check-circle"></i> Order confirmed! Redirecting...
+        </div>
+
+        <button class="confirm-btn" id="main-btn" onclick="confirmOrder()" disabled>
+            <i class="fas fa-lock"></i> Confirm & Pay
+        </button>
+        
+        <a href="menu.html" class="back-link">
+            <i class="fas fa-arrow-left"></i> Back to Menu
+        </a>
     </div>
+
     <script src="checkout.js"></script>
 </body>
 </html>
