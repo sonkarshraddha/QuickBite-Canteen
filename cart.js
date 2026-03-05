@@ -1,47 +1,50 @@
 // Wait for DOM to load
 document.addEventListener('DOMContentLoaded', function() {
-    // --- THE GHOST KILLER ---
-    // This forces the price back to 0 every time you refresh/open the page
-    localStorage.setItem('totalPrice', '0'); 
-    localStorage.setItem('canteenCart', JSON.stringify([]));
     
-    // ... rest of your code ...
+    // --- 1. THE GHOST KILLER & NAME DISPLAY ---
+    // Forces clean start and shows student name
+    const userDisplay = document.getElementById('user-display');
+    const storedName = localStorage.getItem('studentName');
+    
+    if (userDisplay && storedName) {
+        userDisplay.innerText = "Hello, " + storedName;
+    }
+
+    // --- 2. LOGOUT LOGIC ---
+    const logoutBtn = document.getElementById('logout-btn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', function(e) {
+            e.preventDefault(); 
+            localStorage.clear(); // Wipes everything for a clean logout
+            window.location.href = "index.html"; 
+        });
+    }
+
+    // --- 3. CART INITIALIZATION ---
     const cartBar = document.getElementById('cart-bar');
     const cartCountDisplay = document.getElementById('cart-count');
     const totalPriceDisplay = document.getElementById('total-price');
-    const checkoutAmountDisplay = document.getElementById('amount-to-pay'); // For checkout.html
+    const checkoutAmountDisplay = document.getElementById('amount-to-pay');
 
-    // --- NEW: SESSIONS RESET ---
-    // If you want to clear the old order when the page refreshes for the first time
-    // localStorage.removeItem('canteenCart'); 
-    // localStorage.setItem('totalPrice', '0');
-
-    // Initialize cart from localStorage
     let cart = JSON.parse(localStorage.getItem('canteenCart')) || [];
     let totalPrice = parseFloat(localStorage.getItem('totalPrice')) || 0;
     
-    // Update display immediately on load
     updateCartDisplay();
     
-    // --- MENU PAGE: Add to Cart ---
+    // --- 4. MENU PAGE: Add to Cart ---
     window.addToCart = function(itemName, price) {
-        // Add to cart array
         cart.push({ name: itemName, price: price });
         totalPrice += price;
         
-        // Save to localStorage
         localStorage.setItem('canteenCart', JSON.stringify(cart));
         localStorage.setItem('totalPrice', totalPrice.toString());
         
-        // Update display
         updateCartDisplay();
         
-        // Show cart bar if hidden
         if (cartBar) {
             cartBar.classList.remove('cart-hidden');
         }
         
-        // Button animation logic
         if (event && event.target) {
             const btn = event.target;
             const originalText = btn.innerText;
@@ -57,11 +60,8 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateCartDisplay() {
         if (cartCountDisplay) cartCountDisplay.innerText = cart.length;
         if (totalPriceDisplay) totalPriceDisplay.innerText = totalPrice;
-        
-        // Update checkout page if we are on it
         if (checkoutAmountDisplay) checkoutAmountDisplay.innerText = "₹" + totalPrice;
 
-        // Show/hide cart bar
         if (cartBar) {
             if (cart.length > 0) {
                 cartBar.classList.remove('cart-hidden');
@@ -71,7 +71,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // --- RESET LOGIC: Clear Tray ---
+    // --- 5. RESET LOGIC ---
     window.clearTray = function() {
         cart = [];
         totalPrice = 0;
@@ -81,7 +81,7 @@ document.addEventListener('DOMContentLoaded', function() {
         alert("Tray cleared!");
     };
 
-    // --- CHECKOUT LOGIC: Payment Button ---
+    // --- 6. CHECKOUT LOGIC ---
     const payBtn = document.getElementById('confirm-pay-btn');
     if (payBtn) {
         payBtn.addEventListener('click', function() {

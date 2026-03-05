@@ -1,8 +1,10 @@
 document.getElementById('loginForm').addEventListener('submit', async (e) => {
     e.preventDefault();
-
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
+// Inside your login function, after successful authentication:
+const userEmail = document.getElementById('email').value;
+const userName = userEmail.split('@')[0]; // Grabs the name part before the @
+localStorage.setItem('studentName', userName); 
+window.location.href = "menu.html";
 
     try {
         const response = await fetch('http://localhost:3000/login', {
