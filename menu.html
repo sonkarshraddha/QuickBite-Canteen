@@ -3,49 +3,1231 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QuickBite | Menu</title>
-    <link rel="stylesheet" href="menu.css">
+    <title>QuickBite | College Canteen Menu</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f05656 0%, #ec3b3b 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Sidebar Menu */
+        .sidebar {
+            height: 100%;
+            width: 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background: linear-gradient(135deg, #2d3436 0%, #1e272e 100%);
+            box-shadow: 2px 0 30px rgba(0,0,0,0.5);
+            overflow-x: hidden;
+            transition: 0.3s ease-in-out;
+            z-index: 9998;
+            padding-top: 70px;
+            color: white;
+            border-top-right-radius: 30px;
+            border-bottom-right-radius: 30px;
+        }
+
+        .sidebar.open {
+            width: 320px;
+        }
+
+        .sidebar-content {
+            padding: 20px;
+            opacity: 0;
+            transition: opacity 0.2s 0.1s;
+        }
+
+        .sidebar.open .sidebar-content {
+            opacity: 1;
+        }
+
+        .user-profile {
+            text-align: center;
+            padding: 25px 0;
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .user-avatar {
+            width: 90px;
+            height: 90px;
+            background: linear-gradient(135deg, #ff7675, #d63031);
+            border-radius: 50%;
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 45px;
+            color: white;
+            border: 4px solid white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .user-profile h3 {
+            font-size: 1.6rem;
+            margin-bottom: 5px;
+            color: white;
+        }
+
+        .user-profile p {
+            color: #b2bec3;
+            font-size: 0.9rem;
+            background: rgba(0,0,0,0.3);
+            padding: 5px 15px;
+            border-radius: 20px;
+            display: inline-block;
+        }
+
+        .timing-badge {
+            background: #ff7675;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            margin-top: 10px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .timing-badge i {
+            font-size: 1rem;
+        }
+
+        .sidebar-menu-item {
+            padding: 15px 20px;
+            margin: 8px 0;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: #dfe6e9;
+            font-size: 1.1rem;
+        }
+
+        .sidebar-menu-item i {
+            width: 25px;
+            color: #ff7675;
+            font-size: 1.2rem;
+        }
+
+        .sidebar-menu-item:hover {
+            background: #ff7675;
+            color: white;
+            transform: translateX(8px);
+            box-shadow: 0 5px 15px rgba(255,118,117,0.3);
+        }
+
+        .sidebar-menu-item:hover i {
+            color: white;
+        }
+
+        .sidebar-menu-item.active {
+            background: rgba(255,118,117,0.2);
+            border-left: 4px solid #ff7675;
+        }
+
+        .logout-section {
+            margin-top: 40px;
+            border-top: 2px solid rgba(255,255,255,0.1);
+            padding-top: 20px;
+        }
+
+        .logout-btn {
+            background: rgba(214, 48, 49, 0.2);
+            border-radius: 12px;
+        }
+
+        .logout-btn:hover {
+            background: #d63031 !important;
+        }
+
+        /* Overlay */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(3px);
+            z-index: 9997;
+            display: none;
+            transition: 0.3s;
+        }
+
+        .overlay.show {
+            display: block;
+        }
+
+        /* Hamburger Menu Button */
+        .menu-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            width: 55px;
+            height: 55px;
+            background: #d63031;
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            z-index: 9999;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+            transition: all 0.3s;
+            border: 2px solid white;
+        }
+
+        .menu-btn:hover {
+            background: #ff7675;
+            transform: scale(1.05) rotate(180deg);
+        }
+
+        .menu-btn span {
+            width: 30px;
+            height: 4px;
+            background: white;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+
+        /* Close button inside sidebar */
+        .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 30px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: #ff7675;
+            z-index: 9999;
+        }
+
+        .close-btn:hover {
+            background: #d63031;
+            transform: rotate(90deg);
+        }
+
+        /* Header with timing */
+        header {
+            text-align: center;
+            color: white;
+            padding: 30px 20px;
+            margin-left: 0;
+            transition: margin-left 0.3s;
+        }
+
+        .timing-info {
+            background: rgba(0,0,0,0.2);
+            padding: 10px 25px;
+            border-radius: 50px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+            font-size: 1.1rem;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .timing-info i {
+            color: #ffd32a;
+        }
+
+        .content-wrapper {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            transition: margin-left 0.3s;
+        }
+
+        .category-title {
+            color: white;
+            font-size: 2rem;
+            margin: 40px 20px 20px;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+            border-bottom: 3px solid white;
+            padding-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            padding: 20px;
+        }
+
+        .food-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            transition: transform 0.3s, box-shadow 0.3s;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .food-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+        }
+
+        .food-card img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            background: #f0f0f0;
+        }
+
+        .card-info {
+            padding: 20px;
+        }
+
+        .card-info h3 {
+            color: #333;
+            font-size: 1.2rem;
+            margin-bottom: 8px;
+        }
+
+        .card-info p {
+            color: #666;
+            margin-bottom: 15px;
+            line-height: 1.4;
+            font-size: 0.9rem;
+        }
+
+        .price {
+            display: block;
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #d63031;
+            margin-bottom: 15px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .add-btn {
+            flex: 1;
+            padding: 12px;
+            background: #d63031;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .add-btn:hover {
+            background: #ff7675;
+            transform: scale(1.02);
+        }
+
+        .add-btn.added {
+            background: #27ae60;
+        }
+
+        .remove-btn {
+            width: 45px;
+            height: 45px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .remove-btn:hover {
+            background: #c0392b;
+            transform: scale(1.1);
+        }
+
+        .remove-btn:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Floating Cart Bar */
+        #cart-bar {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 900px;
+            background: #2d3436;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 50px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+            z-index: 9996;
+            transition: all 0.3s ease;
+        }
+
+        .cart-hidden {
+            bottom: -100px !important;
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .cart-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .cart-items-list {
+            flex: 1;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            max-height: 100px;
+            overflow-y: auto;
+            padding: 5px;
+        }
+
+        .cart-item-tag {
+            background: #ff7675;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .cart-item-tag button {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            transition: all 0.3s;
+        }
+
+        .cart-item-tag button:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .cart-summary {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .cart-summary span {
+            font-size: 1.1rem;
+        }
+
+        .cart-summary i {
+            color: #d63031;
+            margin-right: 5px;
+        }
+
+        .checkout-btn {
+            background: #ff7675;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 25px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .checkout-btn:hover {
+            background: #d63031;
+            transform: scale(1.05);
+        }
+
+        .clear-cart-btn {
+            background: #636e72;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .clear-cart-btn:hover {
+            background: #7f8c8d;
+        }
+
+        /* AI Chatbot */
+        #ai-bot-container {
+            position: fixed;
+            bottom: 100px;
+            right: 30px;
+            z-index: 9995;
+        }
+
+        #chat-bubble {
+            width: 60px;
+            height: 60px;
+            background: #d63031;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 30px;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            transition: transform 0.3s;
+        }
+
+        #chat-bubble:hover {
+            transform: scale(1.1);
+        }
+
+        #chat-window {
+            width: 320px;
+            height: 450px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 15px;
+            overflow: hidden;
+        }
+
+        .chat-hidden {
+            display: none !important;
+        }
+
+        .chat-header {
+            background: #d63031;
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-header button {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        #chat-body {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            background: #f8f9fa;
+        }
+
+        .bot-msg {
+            background: #e9ecef;
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            max-width: 80%;
+        }
+
+        .user-msg {
+            background: #d63031;
+            color: white;
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            text-align: right;
+            max-width: 80%;
+            margin-left: auto;
+        }
+
+        .chat-input {
+            display: flex;
+            padding: 10px;
+            background: white;
+            border-top: 1px solid #dee2e6;
+        }
+
+        .chat-input input {
+            flex: 1;
+            border: 1px solid #dee2e6;
+            border-radius: 20px;
+            padding: 8px 15px;
+            outline: none;
+        }
+
+        .chat-input button {
+            background: #d63031;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 8px 15px;
+            margin-left: 10px;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2rem;
+            }
+            
+            .category-title {
+                font-size: 1.5rem;
+            }
+            
+            .sidebar.open {
+                width: 280px;
+            }
+            
+            .cart-content {
+                flex-direction: column;
+            }
+            
+            .cart-items-list {
+                max-height: 80px;
+                width: 100%;
+            }
+            
+            .cart-summary {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            #cart-bar {
+                border-radius: 20px;
+            }
+            
+            #ai-bot-container {
+                bottom: 120px;
+                right: 20px;
+            }
+        }
+    </style>
 </head>
 <body>
-    <div class="menu-bg"></div>
-    
+    <!-- Sidebar Menu -->
+    <div class="sidebar" id="sidebar">
+        <div class="close-btn" onclick="toggleSidebar()">×</div>
+        <div class="sidebar-content">
+            <div class="user-profile">
+                <div class="user-avatar">
+                    👨‍🎓
+                </div>
+                <h3>Hello, User!</h3>
+                <p>Computer Science • 3rd Year</p>
+                <div class="timing-badge">
+                    <i class="fas fa-clock"></i>
+                    Canteen Open: 11 AM - 4 PM
+                </div>
+            </div>
+
+            <div class="sidebar-menu-item active" onclick="showOffers()">
+                <i class="fas fa-tags"></i>
+                Special Offers 🔥
+            </div>
+
+            <div class="sidebar-menu-item" onclick="showPreviousOrders()">
+                <i class="fas fa-history"></i>
+                Previous Orders
+            </div>
+
+            <div class="sidebar-menu-item" onclick="showCombos()">
+                <i class="fas fa-utensils"></i>
+                Student Combos
+            </div>
+
+            <div class="sidebar-menu-item" onclick="showFavorites()">
+                <i class="fas fa-heart"></i>
+                My Favorites
+            </div>
+
+            <div class="sidebar-menu-item" onclick="showFeedback()">
+                <i class="fas fa-star"></i>
+                Rate Us
+            </div>
+
+            <div class="logout-section">
+                <div class="sidebar-menu-item logout-btn" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Log Out
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Overlay -->
+    <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+    <!-- Hamburger Menu Button -->
+    <div class="menu-btn" onclick="toggleSidebar()">
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
+
     <div class="content-wrapper">
         <header>
-            <h1>QuickBite Menu 🍛</h1>
-            <p>Fresh food from your canteen</p>
+            <h1>QuickBite 🍛</h1>
+            <p>Your College Canteen - Fresh & Affordable Food</p>
+            <div class="timing-info">
+                <i class="fas fa-clock"></i>
+                Open Today: 11:00 AM - 4:00 PM
+                <i class="fas fa-graduation-cap" style="margin-left: 10px;"></i>
+            </div>
         </header>
 
+        <!-- Heavy Breakfast Section -->
+        <h2 class="category-title">🌅 Heavy Breakfast</h2>
         <div class="menu-grid">
-            <!-- Food Card 1 -->
+            <!-- Veg Sandwich -->
             <div class="food-card">
-                <img src="idli.jpg.png" alt="Dosa Idli">
+                <img src="sandwich.jpg" alt="Veg Sandwich" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%23f39c12\'/%3E%3Ctext x=\'50\' y=\'120\' fill=\'white\' font-size=\'24\'%3E🥪 Sandwich%3C/text%3E%3C/svg%3E'">
                 <div class="card-info">
-                    <h3>South Indian Combo</h3>
-                    <p>Idli, Dosa & Medu Vada</p>
+                    <h3>Veg Sandwich</h3>
+                    <p>Grilled sandwich with fresh veggies and cheese</p>
+                    <span class="price">₹35</span>
+                    <div class="button-group">
+                        <button class="add-btn" onclick="addToCart('Veg Sandwich', 35, this)">Add +</button>
+                        <button class="remove-btn" onclick="removeOneFromCart('Veg Sandwich', this)" disabled>−</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Veg Maggi -->
+            <div class="food-card">
+                <img src="maggi.jpg" alt="Veg Maggi" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%23e67e22\'/%3E%3Ctext x=\'50\' y=\'120\' fill=\'white\' font-size=\'24\'%3E🍜 Maggi%3C/text%3E%3C/svg%3E'">
+                <div class="card-info">
+                    <h3>Veg Maggi</h3>
+                    <p>Hot & spicy noodles with veggies</p>
+                    <span class="price">₹40</span>
+                    <div class="button-group">
+                        <button class="add-btn" onclick="addToCart('Veg Maggi', 40, this)">Add +</button>
+                        <button class="remove-btn" onclick="removeOneFromCart('Veg Maggi', this)" disabled>−</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Poha -->
+            <div class="food-card">
+                <img src="poha.jpg" alt="Poha" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%2395a5a6\'/%3E%3Ctext x=\'50\' y=\'120\' fill=\'white\' font-size=\'24\'%3E🥣 Poha%3C/text%3E%3C/svg%3E'">
+                <div class="card-info">
+                    <h3>Poha</h3>
+                    <p>Flattened rice with peanuts and lemon</p>
+                    <span class="price">₹25</span>
+                    <div class="button-group">
+                        <button class="add-btn" onclick="addToCart('Poha', 25, this)">Add +</button>
+                        <button class="remove-btn" onclick="removeOneFromCart('Poha', this)" disabled>−</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Upma -->
+            <div class="food-card">
+                <img src="upma.jpg" alt="Upma" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%23f1c40f\'/%3E%3Ctext x=\'50\' y=\'120\' fill=\'white\' font-size=\'24\'%3E🥘 Upma%3C/text%3E%3C/svg%3E'">
+                <div class="card-info">
+                    <h3>Upma</h3>
+                    <p>South Indian semolina breakfast</p>
+                    <span class="price">₹25</span>
+                    <div class="button-group">
+                        <button class="add-btn" onclick="addToCart('Upma', 25, this)">Add +</button>
+                        <button class="remove-btn" onclick="removeOneFromCart('Upma', this)" disabled>−</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Aloo Paratha -->
+            <div class="food-card">
+                <img src="paratha.jpg" alt="Aloo Paratha" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%23e67e22\'/%3E%3Ctext x=\'50\' y=\'120\' fill=\'white\' font-size=\'24\'%3E🫓 Paratha%3C/text%3E%3C/svg%3E'">
+                <div class="card-info">
+                    <h3>Aloo Paratha</h3>
+                    <p>Stuffed potato paratha with curd & pickle</p>
+                    <span class="price">₹45</span>
+                    <div class="button-group">
+                        <button class="add-btn" onclick="addToCart('Aloo Paratha', 45, this)">Add +</button>
+                        <button class="remove-btn" onclick="removeOneFromCart('Aloo Paratha', this)" disabled>−</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chole Bhature -->
+            <div class="food-card">
+                <img src="chole-bhature.jpg" alt="Chole Bhature" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%23c0392b\'/%3E%3Ctext x=\'50\' y=\'120\' fill=\'white\' font-size=\'24\'%3E🍛 Chole Bhature%3C/text%3E%3C/svg%3E'">
+                <div class="card-info">
+                    <h3>Chole Bhature</h3>
+                    <p>Spicy chickpea curry with fried bread</p>
                     <span class="price">₹60</span>
-                    <button class="add-btn" onclick="addToCart('South Indian Combo', 60)">Add +</button>
+                    <div class="button-group">
+                        <button class="add-btn" onclick="addToCart('Chole Bhature', 60, this)">Add +</button>
+                        <button class="remove-btn" onclick="removeOneFromCart('Chole Bhature', this)" disabled>−</button>
+                    </div>
                 </div>
             </div>
 
-            <!-- Food Card 2 -->
+            <!-- Samosa -->
             <div class="food-card">
-                <img src="n.jpg.png" alt="Noodles">
+                <img src="samosa.jpg" alt="Samosa" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%23d35400\'/%3E%3Ctext x=\'50\' y=\'120\' fill=\'white\' font-size=\'24\'%3E🥟 Samosa%3C/text%3E%3C/svg%3E'">
                 <div class="card-info">
-                    <h3>Veg Hakka Noodles</h3>
-                    <p>Spicy & Loaded with Veggies</p>
+                    <h3>Samosa (2 pcs)</h3>
+                    <p>Crispy pastry with spiced potato filling</p>
+                    <span class="price">₹20</span>
+                    <div class="button-group">
+                        <button class="add-btn" onclick="addToCart('Samosa', 20, this)">Add +</button>
+                        <button class="remove-btn" onclick="removeOneFromCart('Samosa', this)" disabled>−</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bread Pakora -->
+            <div class="food-card">
+                <img src="bread-pakora.jpg" alt="Bread Pakora" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%23f39c12\'/%3E%3Ctext x=\'50\' y=\'120\' fill=\'white\' font-size=\'24\'%3E🍞 Bread Pakora%3C/text%3E%3C/svg%3E'">
+                <div class="card-info">
+                    <h3>Bread Pakora</h3>
+                    <p>Bread fritter with chutney</p>
+                    <span class="price">₹25</span>
+                    <div class="button-group">
+                        <button class="add-btn" onclick="addToCart('Bread Pakora', 25, this)">Add +</button>
+                        <button class="remove-btn" onclick="removeOneFromCart('Bread Pakora', this)" disabled>−</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Meals Section -->
+        <h2 class="category-title">🍛 Main Meals (Lunch/Dinner)</h2>
+        <div class="menu-grid">
+            <!-- North Indian Thali -->
+            <div class="food-card">
+                <img src="north-thali.jpg" alt="North Indian Thali" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%2327ae60\'/%3E%3Ctext x=\'50\' y=\'120\' fill=\'white\' font-size=\'24\'%3E🍱 North Thali%3C/text%3E%3C/svg%3E'">
+                <div class="card-info">
+                    <h3>North Indian Thali</h3>
+                    <p>2 Rotis, Sabzi, Rice, Dal, Salad</p>
                     <span class="price">₹80</span>
-                    <button class="add-btn" onclick="addToCart('Veg Hakka Noodles', 80)">Add +</button>
+                    <div class="button-group">
+                        <button class="add-btn" onclick="addToCart('North Indian Thali', 80, this)">Add +</button>
+                        <button class="remove-btn" onclick="removeOneFromCart('North Indian Thali', this)" disabled>−</button>
+                    </div>
                 </div>
             </div>
 
-            <!-- Food Card 3 -->
+            <!-- South Indian Thali -->
             <div class="food-card">
-                <img src="r.jpg.png" alt="Rice Bowl">
+                <img src="south-thali.jpg" alt="South Indian Thali" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%239b59b6\'/%3E%3Ctext x=\'50\' y=\'120\' fill=\'white\' font-size=\'24\'%3E🍚 South Thali%3C/text%3E%3C/svg%3E'">
                 <div class="card-info">
-                    <h3>Veg Fried Rice</h3>
-                    <p>Authentic Basmati Rice</p>
-                    <span class="price">₹70</span>
-                    <button class="add-btn" onclick="addToCart('Veg Fried Rice', 70)">Add +</button>
+                    <h3>South Indian Thali</h3>
+                    <p>Rice, Sambhar, Rasam, Veg, Papad</p>
+                    <span class="price">₹75</span>
+                    <div class="button-group">
+                        <button class="add-btn" onclick="addToCart('South Indian Thali', 75, this)">Add +</button>
+                        <button class="remove-btn" onclick="removeOneFromCart('South Indian Thali', this)" disabled>−</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Veg Biryani -->
+            <div class="food-card">
+                <img src="biryani.jpg" alt="Veg Biryani" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%23e67e22\'/%3E%3Ctext x=\'50\' y=\'120\' fill=\'white\' font-size=\'24\'%3E🍛 Biryani%3C/text%3E%3C/svg%3E'">
+                <div class="card-info">
+                    <h3>Veg Biryani</h3>
+                    <p>Aromatic rice with veggies & raita</p>
+                    <span class="price">₹65</span>
+                    <div class="button-group">
+                        <button class="add-btn" onclick="addToCart('Veg Biryani', 65, this)">Add +</button>
+                        <button class="remove-btn" onclick="removeOneFromCart('Veg Biryani', this)" disabled>−</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Rajma Chawal -->
+            <div class="food-card">
+                <img src="rajma.jpg" alt="Rajma Chawal" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%23c0392b\'/%3E%3Ctext x=\'50\' y=\'120\' fill=\'white\' font-size=\'24\'%3E🥘 Rajma Chawal%3C/text%3E%3C/svg%3E'">
+                <div class="card-info">
+                    <h3>Rajma Chawal</h3>
+                    <p>Kidney bean curry with steamed rice</p>
+                    <span class="price">₹50</span>
+                    <div class="button-group">
+                        <button class="add-btn" onclick="addToCart('Rajma Chawal', 50, this)">Add +</button>
+                        <button class="remove-btn" onclick="removeOneFromCart('Rajma Chawal', this)" disabled>−</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Kadhi Chawal -->
+            <div class="food-card">
+                <img src="kadhi.jpg" alt="Kadhi Chawal" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%23f1c40f\'/%3E%3Ctext x=\'50\' y=\'120\' fill=\'white\' font-size=\'24\'%3E🥣 Kadhi Chawal%3C/text%3E%3C/svg%3E'">
+                <div class="card-info">
+                    <h3>Kadhi Chawal</h3>
+                    <p>Yogurt curry with rice and pakoras</p>
+                    <span class="price">₹50</span>
+                    <div class="button-group">
+                        <button class="add-btn" onclick="addToCart('Kadhi Chawal', 50, this)">Add +</button>
+                        <button class="remove-btn" onclick="removeOneFromCart('Kadhi Chawal', this)" disabled>−</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pulao + Curd -->
+            <div class="food-card">
+                <img src="pulao.jpg" alt="Pulao" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%2327ae60\'/%3E%3Ctext x=\'50\' y=\'120\' fill=\'white\' font-size=\'24\'%3E🍚 Pulao%3C/text%3E%3C/svg%3E'">
+                <div class="card-info">
+                    <h3>Veg Pulao + Curd</h3>
+                    <p>Flavored rice with raita</p>
+                    <span class="price">₹45</span>
+                    <div class="button-group">
+                        <button class="add-btn" onclick="addToCart('Veg Pulao', 45, this)">Add +</button>
+                        <button class="remove-btn" onclick="removeOneFromCart('Veg Pulao', this)" disabled>−</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chinese Corner -->
+        <h2 class="category-title">🥢 Chinese Corner</h2>
+        <div class="menu-grid">
+            <!-- Veg Chowmein -->
+            <div class="food-card">
+                <img src="chowmein.jpg" alt="Veg Chowmein" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%23e67e22\'/%3E%3Ctext x=\'50\' y=\'120\' fill=\'white\' font-size=\'24\'%3E🍜 Chowmein%3C/text%3E%3C/svg%3E'">
+                <div class="card-info">
+                    <h3>Veg Chowmein</h3>
+                    <p>Hakka noodles with veggies</p>
+                    <span class="price">₹50</span>
+                    <div class="button-group">
+                        <button class="add-btn" onclick="addToCart('Veg Chowmein', 50, this)">Add +</button>
+                        <button class="remove-btn" onclick="removeOneFromCart('Veg Chowmein', this)" disabled>−</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gobi Manchurian -->
+            <div class="food-card">
+                <img src="manchurian.jpg" alt="Gobi Manchurian" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%23d35400\'/%3E%3Ctext x=\'50\' y=\'120\' fill=\'white\' font-size=\'24\'%3E🥦 Manchurian%3C/text%3E%3C/svg%3E'">
+                <div class="card-info">
+                    <h3>Gobi Manchurian</h3>
+                    <p>Cauliflower in spicy sauce</p>
+                    <span class="price">₹60</span>
+                    <div class="button-group">
+                        <button class="add-btn" onclick="addToCart('Gobi Manchurian', 60, this)">Add +</button>
+                        <button class="remove-btn" onclick="removeOneFromCart('Gobi Manchurian', this)" disabled>−</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Spring Rolls -->
+            <div class="food-card">
+                <img src="spring-rolls.jpg" alt="Spring Rolls" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%239b59b6\'/%3E%3Ctext x=\'50\' y=\'120\' fill=\'white\' font-size=\'24\'%3E🌯 Spring Rolls%3C/text%3E%3C/svg%3E'">
+                <div class="card-info">
+                    <h3>Spring Rolls (2 pcs)</h3>
+                    <p>Crispy veg rolls with sauce</p>
+                    <span class="price">₹40</span>
+                    <div class="button-group">
+                        <button class="add-btn" onclick="addToCart('Spring Rolls', 40, this)">Add +</button>
+                        <button class="remove-btn" onclick="removeOneFromCart('Spring Rolls', this)" disabled>−</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chilli Potato -->
+            <div class="food-card">
+                <img src="chilli-potato.jpg" alt="Chilli Potato" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%23e74c3c\'/%3E%3Ctext x=\'50\' y=\'120\' fill=\'white\' font-size=\'24\'%3E🥔 Chilli Potato%3C/text%3E%3C/svg%3E'">
+                <div class="card-info">
+                    <h3>Chilli Potato</h3>
+                    <p>Crispy potatoes in chilli sauce</p>
+                    <span class="price">₹55</span>
+                    <div class="button-group">
+                        <button class="add-btn" onclick="addToCart('Chilli Potato', 55, this)">Add +</button>
+                        <button class="remove-btn" onclick="removeOneFromCart('Chilli Potato', this)" disabled>−</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Bites & Snacks -->
+        <h2 class="category-title">🍟 Quick Bites & Snacks</h2>
+        <div class="menu-grid">
+            <!-- Vada Pav -->
+            <div class="food-card">
+                <img src="vada-pav.jpg" alt="Vada Pav" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%23f39c12\'/%3E%3Ctext x=\'50\' y=\'120\' fill=\'white\' font-size=\'24\'%3E🥪 Vada Pav%3C/text%3E%3C/svg%3E'">
+                <div class="card-info">
+                    <h3>Vada Pav</h3>
+                    <p>Mumbai style spicy vada in bun</p>
+                    <span class="price">₹20</span>
+                    <div class="button-group">
+                        <button class="add-btn" onclick="addToCart('Vada Pav', 20, this)">Add +</button>
+                        <button class="remove-btn" onclick="removeOneFromCart('Vada Pav', this)" disabled>−</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pav Bhaji -->
+            <div class="food-card">
+                <img src="pav-bhaji.jpg" alt="Pav Bhaji" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%23e67e22\'/%3E%3Ctext x=\'50\' y=\'120\' fill=\'white\' font-size=\'24\'%3E🍛 Pav Bhaji%3C/text%3E%3C/svg%3E'">
+                <div class="card-info">
+                    <h3>Pav Bhaji (2 Pav)</h3>
+                    <p>Mixed veg curry with buttered buns</p>
+                    <span class="price">₹60</span>
+                    <div class="button-group">
+                        <button class="add-btn" onclick="addToCart('Pav Bhaji', 60, this)">Add +</button>
+                        <button class="remove-btn" onclick="removeOneFromCart('Pav Bhaji', this)" disabled>−</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Veg Frankie -->
+            <div class="food-card">
+                <img src="frankie.jpg" alt="Veg Frankie" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%2327ae60\'/%3E%3Ctext x=\'50\' y=\'120\' fill=\'white\' font-size=\'24\'%3E🌯 Frankie%3C/text%3E%3C/svg%3E'">
+                <div class="card-info">
+                    <h3>Veg Frankie</h3>
+                    <p>Rolled roti with spicy veg filling</p>
+                    <span class="price">₹50</span>
+                    <div class="button-group">
+                        <button class="add-btn" onclick="addToCart('Veg Frankie', 50, this)">Add +</button>
+                        <button class="remove-btn" onclick="removeOneFromCart('Veg Frankie', this)" disabled>−</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- French Fries -->
+            <div class="food-card">
+                <img src="fries.jpg" alt="French Fries" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%23f1c40f\'/%3E%3Ctext x=\'50\' y=\'120\' fill=\'white\' font-size=\'24\'%3E🍟 Fries%3C/text%3E%3C/svg%3E'">
+                <div class="card-info">
+                    <h3>French Fries</h3>
+                    <p>Crispy potato fries with seasoning</p>
+                    <span class="price">₹45</span>
+                    <div class="button-group">
+                        <button class="add-btn" onclick="addToCart('French Fries', 45, this)">Add +</button>
+                        <button class="remove-btn" onclick="removeOneFromCart('French Fries', this)" disabled>−</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Veg Cutlet -->
+            <div class="food-card">
+                <img src="cutlet.jpg" alt="Veg Cutlet" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%2395a5a6\'/%3E%3Ctext x=\'50\' y=\'120\' fill=\'white\' font-size=\'24\'%3E🍘 Cutlet%3C/text%3E%3C/svg%3E'">
+                <div class="card-info">
+                    <h3>Veg Cutlet (2 pcs)</h3>
+                    <p>Breaded veg patties with chutney</p>
+                    <span class="price">₹35</span>
+                    <div class="button-group">
+                        <button class="add-btn" onclick="addToCart('Veg Cutlet', 35, this)">Add +</button>
+                        <button class="remove-btn" onclick="removeOneFromCart('Veg Cutlet', this)" disabled>−</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Beverages -->
+        <h2 class="category-title">☕ Beverages</h2>
+        <div class="menu-grid">
+            <!-- Chai -->
+            <div class="food-card">
+                <img src="chai.jpg" alt="Chai" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%238e44ad\'/%3E%3Ctext x=\'50\' y=\'120\' fill=\'white\' font-size=\'24\'%3E☕ Chai%3C/text%3E%3C/svg%3E'">
+                <div class="card-info">
+                    <h3>Masala Chai</h3>
+                    <p>Hot spiced tea</p>
+                    <span class="price">₹10</span>
+                    <div class="button-group">
+                        <button class="add-btn" onclick="addToCart('Masala Chai', 10, this)">Add +</button>
+                        <button class="remove-btn" onclick="removeOneFromCart('Masala Chai', this)" disabled>−</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Coffee -->
+            <div class="food-card">
+                <img src="coffee.jpg" alt="Coffee" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%236d4c41\'/%3E%3Ctext x=\'50\' y=\'120\' fill=\'white\' font-size=\'24\'%3E☕ Coffee%3C/text%3E%3C/svg%3E'">
+                <div class="card-info">
+                    <h3>Filter Coffee</h3>
+                    <p>South Indian filter coffee</p>
+                    <span class="price">₹15</span>
+                    <div class="button-group">
+                        <button class="add-btn" onclick="addToCart('Filter Coffee', 15, this)">Add +</button>
+                        <button class="remove-btn" onclick="removeOneFromCart('Filter Coffee', this)" disabled>−</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cold Coffee -->
+            <div class="food-card">
+                <img src="cold-coffee.jpg" alt="Cold Coffee" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%233f51b5\'/%3E%3Ctext x=\'50\' y=\'120\' fill=\'white\' font-size=\'24\'%3E🥤 Cold Coffee%3C/text%3E%3C/svg%3E'">
+                <div class="card-info">
+                    <h3>Cold Coffee</h3>
+                    <p>Chilled coffee with ice cream</p>
+                    <span class="price">₹40</span>
+                    <div class="button-group">
+                        <button class="add-btn" onclick="addToCart('Cold Coffee', 40, this)">Add +</button>
+                        <button class="remove-btn" onclick="removeOneFromCart('Cold Coffee', this)" disabled>−</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lassi -->
+            <div class="food-card">
+                <img src="lassi.jpg" alt="Lassi" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%23f8c291\'/%3E%3Ctext x=\'50\' y=\'120\' fill=\'white\' font-size=\'24\'%3E🥛 Lassi%3C/text%3E%3C/svg%3E'">
+                <div class="card-info">
+                    <h3>Sweet Lassi</h3>
+                    <p>Thick yogurt drink</p>
+                    <span class="price">₹35</span>
+                    <div class="button-group">
+                        <button class="add-btn" onclick="addToCart('Sweet Lassi', 35, this)">Add +</button>
+                        <button class="remove-btn" onclick="removeOneFromCart('Sweet Lassi', this)" disabled>−</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Buttermilk -->
+            <div class="food-card">
+                <img src="buttermilk.jpg" alt="Buttermilk" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%23b8e994\'/%3E%3Ctext x=\'50\' y=\'120\' fill=\'white\' font-size=\'24\'%3E🥛 Buttermilk%3C/text%3E%3C/svg%3E'">
+                <div class="card-info">
+                    <h3>Masala Buttermilk</h3>
+                    <p>Spiced yogurt drink</p>
+                    <span class="price">₹25</span>
+                    <div class="button-group">
+                        <button class="add-btn" onclick="addToCart('Buttermilk', 25, this)">Add +</button>
+                        <button class="remove-btn" onclick="removeOneFromCart('Buttermilk', this)" disabled>−</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lemon Soda -->
+            <div class="food-card">
+                <img src="lemon-soda.jpg" alt="Lemon Soda" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%23f6e58d\'/%3E%3Ctext x=\'50\' y=\'120\' fill=\'white\' font-size=\'24\'%3E🍋 Lemon Soda%3C/text%3E%3C/svg%3E'">
+                <div class="card-info">
+                    <h3>Lemon Soda</h3>
+                    <p>Fresh lime with soda</p>
+                    <span class="price">₹20</span>
+                    <div class="button-group">
+                        <button class="add-btn" onclick="addToCart('Lemon Soda', 20, this)">Add +</button>
+                        <button class="remove-btn" onclick="removeOneFromCart('Lemon Soda', this)" disabled>−</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cold Drink -->
+            <div class="food-card">
+                <img src="cold-drink.jpg" alt="Cold Drink" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%23ffb8b8\'/%3E%3Ctext x=\'50\' y=\'120\' fill=\'white\' font-size=\'24\'%3E🥤 Cold Drink%3C/text%3E%3C/svg%3E'">
+                <div class="card-info">
+                    <h3>Cold Drink (500ml)</h3>
+                    <p>Assorted soft drinks</p>
+                    <span class="price">₹25</span>
+                    <div class="button-group">
+                        <button class="add-btn" onclick="addToCart('Cold Drink', 25, this)">Add +</button>
+                        <button class="remove-btn" onclick="removeOneFromCart('Cold Drink', this)" disabled>−</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chocolate Shake -->
+            <div class="food-card">
+                <img src="chocolate-shake.jpg" alt="Chocolate Shake" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%237b5e57\'/%3E%3Ctext x=\'50\' y=\'120\' fill=\'white\' font-size=\'24\'%3E🍫 Shake%3C/text%3E%3C/svg%3E'">
+                <div class="card-info">
+                    <h3>Chocolate Shake</h3>
+                    <p>Thick chocolate milkshake</p>
+                    <span class="price">₹50</span>
+                    <div class="button-group">
+                        <button class="add-btn" onclick="addToCart('Chocolate Shake', 50, this)">Add +</button>
+                        <button class="remove-btn" onclick="removeOneFromCart('Chocolate Shake', this)" disabled>−</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Late Night/Chai Time Combos -->
+        <h2 class="category-title">🌙 Late Night Combos</h2>
+        <div class="menu-grid">
+            <!-- Bun Maska + Chai -->
+            <div class="food-card">
+                <img src="bun-maska.jpg" alt="Bun Maska" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%23d2a679\'/%3E%3Ctext x=\'50\' y=\'120\' fill=\'white\' font-size=\'24\'%3E🥐 Bun Maska%3C/text%3E%3C/svg%3E'">
+                <div class="card-info">
+                    <h3>Bun Maska + Chai</h3>
+                    <p>Buttered bun with hot tea</p>
+                    <span class="price">₹30</span>
+                    <div class="button-group">
+                        <button class="add-btn" onclick="addToCart('Bun Maska Combo', 30, this)">Add +</button>
+                        <button class="remove-btn" onclick="removeOneFromCart('Bun Maska Combo', this)" disabled>−</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Toast & Jam + Chai -->
+            <div class="food-card">
+                <img src="toast.jpg" alt="Toast & Jam" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%23e67e22\'/%3E%3Ctext x=\'50\' y=\'120\' fill=\'white\' font-size=\'24\'%3E🍞 Toast & Jam%3C/text%3E%3C/svg%3E'">
+                <div class="card-info">
+                    <h3>Toast & Jam + Chai</h3>
+                    <p>2 toast slices with jam and tea</p>
+                    <span class="price">₹25</span>
+                    <div class="button-group">
+                        <button class="add-btn" onclick="addToCart('Toast Jam Combo', 25, this)">Add +</button>
+                        <button class="remove-btn" onclick="removeOneFromCart('Toast Jam Combo', this)" disabled>−</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Packet Chips -->
+            <div class="food-card">
+                <img src="chips.jpg" alt="Packet Chips" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%23f39c12\'/%3E%3Ctext x=\'50\' y=\'120\' fill=\'white\' font-size=\'24\'%3E🥔 Potato Chips%3C/text%3E%3C/svg%3E'">
+                <div class="card-info">
+                    <h3>Packet Chips</h3>
+                    <p>Assorted flavors (Lays/Kurkure)</p>
+                    <span class="price">₹10</span>
+                    <div class="button-group">
+                        <button class="add-btn" onclick="addToCart('Packet Chips', 10, this)">Add +</button>
+                        <button class="remove-btn" onclick="removeOneFromCart('Packet Chips', this)" disabled>−</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -53,33 +1235,416 @@
 
     <!-- Floating Cart Bar -->
     <div id="cart-bar" class="cart-hidden">
-        <div class="cart-info-bottom">
-            <span>Items: <b id="cart-count">0</b></span>
-            <span>Total: <b>₹<span id="total-price">0</span></b></span>
+        <div class="cart-content">
+            <div class="cart-items-list" id="cart-items-list">
+                <!-- Cart items will appear here as tags -->
+            </div>
+            <div class="cart-summary">
+                <span><i class="fas fa-shopping-cart"></i> <span id="cart-count">0</span></span>
+                <span><i class="fas fa-rupee-sign"></i> <span id="total-price">0</span></span>
+                <button class="clear-cart-btn" onclick="clearCart()">Clear</button>
+                <button class="checkout-btn" onclick="viewCart()">Checkout →</button>
+            </div>
         </div>
-        <button class="checkout-btn" onclick="window.location.href='cart.html'">View Cart & Checkout</button>
     </div>
 
     <!-- AI Chatbot -->
     <div id="ai-bot-container">
         <div id="chat-window" class="chat-hidden">
             <div class="chat-header">
-                <span>Quickie AI 🤖</span>
+                <span>🤖 Quickie AI</span>
                 <button onclick="toggleChat()">×</button>
             </div>
             <div id="chat-body">
-                <p class="bot-msg">Hi! I'm Quickie. How can I help you eat today?</p>
+                <p class="bot-msg">Hi! I'm Quickie. Canteen is open 11 AM - 4 PM. How can I help you?</p>
             </div>
             <div class="chat-input">
                 <input type="text" id="user-input" placeholder="Ask me something...">
                 <button onclick="sendMessage()">Send</button>
             </div>
+            <div style="padding: 5px; font-size: 0.8rem; text-align: center; color: #666;">
+                Suggestions: 
+                <button onclick="document.getElementById('user-input').value='Show menu'; sendMessage()" style="background: none; border: none; color: #d63031; cursor: pointer; font-size: 0.8rem;">Menu</button> |
+                <button onclick="document.getElementById('user-input').value='Today\'s special'; sendMessage()" style="background: none; border: none; color: #d63031; cursor: pointer; font-size: 0.8rem;">Specials</button> |
+                <button onclick="document.getElementById('user-input').value='Veg Biryani price'; sendMessage()" style="background: none; border: none; color: #d63031; cursor: pointer; font-size: 0.8rem;">Prices</button>
+            </div>
         </div>
-        <div id="chat-bubble" onclick="toggleChat()">💬</div>
+        <div id="chat-bubble" onclick="toggleChat()">
+            💬
+        </div>
     </div>
 
-    <script src="cart.js"></script>
-    <script src="bot.js"></script>
-    <script src="menu.js"></script>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <script>
+        // Initialize cart
+        let cart = [];
+        
+        // Clear any existing cart data on page load
+        localStorage.removeItem('quickbite_cart');
+        localStorage.removeItem('quickbite_total');
+        
+        // Track item counts for all food items
+        let itemCounts = {};
+        
+        // Update cart display on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateCartDisplay();
+            updateRemoveButtons();
+        });
+
+        // Sidebar functions
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('show');
+        }
+
+        function showOffers() {
+            alert('🎉 Special Offers for Students!\n\n• Buy 2 Samosa get 1 Free\n• Combo: Maggi + Chai @ ₹45 only\n• 10% off on orders above ₹200');
+            toggleSidebar();
+        }
+
+        function showPreviousOrders() {
+            alert('📋 Your Previous Orders:\n\n1. Veg Biryani + Cold Drink - ₹90\n2. Pav Bhaji - ₹60\n3. Chole Bhature - ₹60');
+                        toggleSidebar();
+        }
+
+        function showCombos() {
+            alert('🍽️ Student Combos:\n\n• Study Combo: Coffee + Sandwich - ₹45\n• Party Combo: 2 Samosa + 2 Chai - ₹50\n• Heavy Meal: Thali + Lassi - ₹100');
+            toggleSidebar();
+        }
+
+        function showFavorites() {
+            alert('❤️ Your Favorites:\n\n• Veg Maggi\n• Masala Dosa\n• Cold Coffee');
+            toggleSidebar();
+        }
+
+        function showFeedback() {
+            alert('⭐ Rate Us!\n\nPlease share your feedback at feedback@quickbite.com');
+            toggleSidebar();
+        }
+
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                alert('👋 Logged out successfully!');
+                // In a real app, you'd redirect to login page
+                window.location.reload();
+            }
+        }
+
+        // Cart functions
+        function addToCart(itemName, price, button) {
+            // Check if canteen is open (11 AM - 4 PM)
+            const now = new Date();
+            const hour = now.getHours();
+            if (hour < 11 || hour >= 16) {
+                alert('🕒 Canteen is currently closed! Open from 11 AM to 4 PM.');
+                return;
+            }
+
+            // Add item to cart
+            cart.push({
+                id: Date.now() + Math.random(),
+                name: itemName,
+                price: price
+            });
+            
+            // Update item count
+            itemCounts[itemName] = (itemCounts[itemName] || 0) + 1;
+            
+            // Update display
+            updateCartDisplay();
+            updateRemoveButtons();
+            
+            // Button animation
+            const originalText = button.innerText;
+            button.innerText = "✓ Added!";
+            button.classList.add('added');
+            button.disabled = true;
+            
+            setTimeout(() => {
+                button.innerText = originalText;
+                button.classList.remove('added');
+                button.disabled = false;
+            }, 500);
+            
+            // Show cart bar
+            const cartBar = document.getElementById('cart-bar');
+            cartBar.classList.remove('cart-hidden');
+        }
+
+        function removeOneFromCart(itemName, button) {
+            // Find the last occurrence of this item
+            for (let i = cart.length - 1; i >= 0; i--) {
+                if (cart[i].name === itemName) {
+                    cart.splice(i, 1);
+                    break;
+                }
+            }
+            
+            // Update item count
+            itemCounts[itemName] = Math.max(0, (itemCounts[itemName] || 0) - 1);
+            
+            // Update display
+            updateCartDisplay();
+            updateRemoveButtons();
+            
+            // Button animation
+            button.style.backgroundColor = '#e74c3c';
+            setTimeout(() => {
+                button.style.backgroundColor = '';
+            }, 200);
+            
+            // Hide cart bar if empty
+            if (cart.length === 0) {
+                document.getElementById('cart-bar').classList.add('cart-hidden');
+            }
+        }
+
+        function removeSpecificItem(itemId, itemName) {
+            // Remove item by ID
+            cart = cart.filter(item => item.id !== itemId);
+            
+            // Update item count
+            itemCounts[itemName] = Math.max(0, (itemCounts[itemName] || 0) - 1);
+            
+            // Update display
+            updateCartDisplay();
+            updateRemoveButtons();
+            
+            // Hide cart bar if empty
+            if (cart.length === 0) {
+                document.getElementById('cart-bar').classList.add('cart-hidden');
+            }
+        }
+
+        function updateCartDisplay() {
+            const cartCount = document.getElementById('cart-count');
+            const totalPrice = document.getElementById('total-price');
+            const cartItemsList = document.getElementById('cart-items-list');
+            
+            // Update count
+            cartCount.textContent = cart.length;
+            
+            // Calculate total
+            const total = cart.reduce((sum, item) => sum + item.price, 0);
+            totalPrice.textContent = total;
+            
+            // Update cart items list with remove buttons
+            if (cart.length > 0) {
+                // Group items for display
+                const groupedItems = {};
+                cart.forEach(item => {
+                    if (!groupedItems[item.name]) {
+                        groupedItems[item.name] = {
+                            count: 1,
+                            ids: [item.id]
+                        };
+                    } else {
+                        groupedItems[item.name].count++;
+                        groupedItems[item.name].ids.push(item.id);
+                    }
+                });
+                
+                cartItemsList.innerHTML = Object.entries(groupedItems).map(([name, data]) => `
+                    <span class="cart-item-tag">
+                        ${name} x${data.count}
+                        <button onclick="removeSpecificItem('${data.ids[0]}', '${name}')">−</button>
+                    </span>
+                `).join('');
+            } else {
+                cartItemsList.innerHTML = '';
+            }
+        }
+
+        function updateRemoveButtons() {
+            // Enable/disable remove buttons based on item counts
+            document.querySelectorAll('.remove-btn').forEach(button => {
+                const cardInfo = button.closest('.card-info');
+                const itemName = cardInfo.querySelector('h3').textContent;
+                
+                if (itemCounts[itemName] > 0) {
+                    button.disabled = false;
+                    button.style.opacity = '1';
+                } else {
+                    button.disabled = true;
+                    button.style.opacity = '0.5';
+                }
+            });
+        }
+
+        function clearCart() {
+            if (confirm('Are you sure you want to clear your cart?')) {
+                cart = [];
+                itemCounts = {};
+                updateCartDisplay();
+                updateRemoveButtons();
+                document.getElementById('cart-bar').classList.add('cart-hidden');
+            }
+        }
+
+        function viewCart() {
+            if (cart.length === 0) {
+                alert('Your cart is empty!');
+                return;
+            }
+
+            // Check if canteen is open before checkout
+            const now = new Date();
+            const hour = now.getHours();
+            if (hour < 11 || hour >= 16) {
+                alert('🕒 Canteen is closed! Orders can only be placed between 11 AM - 4 PM.');
+                return;
+            }
+            
+            // Save current cart for cart page
+            localStorage.setItem('quickbite_cart', JSON.stringify(cart));
+            
+            // Calculate total
+            const total = cart.reduce((sum, item) => sum + item.price, 0);
+            
+            // Show order summary
+            let orderSummary = '🧾 ORDER SUMMARY\n\n';
+            const groupedItems = {};
+            cart.forEach(item => {
+                groupedItems[item.name] = (groupedItems[item.name] || 0) + 1;
+            });
+            
+            Object.entries(groupedItems).forEach(([name, count]) => {
+                const item = cart.find(i => i.name === name);
+                orderSummary += `${name} x${count} = ₹${item.price * count}\n`;
+            });
+            
+            orderSummary += `\nTotal: ₹${total}`;
+            orderSummary += `\n\n✅ Order placed successfully!`;
+            orderSummary += `\n⏰ Pickup time: 15-20 minutes`;
+            
+            alert(orderSummary);
+            
+            // Clear cart after order
+            clearCart();
+        }
+
+        // Chatbot functions
+        function toggleChat() {
+            const chatWindow = document.getElementById('chat-window');
+            chatWindow.classList.toggle('chat-hidden');
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('user-input');
+            const message = input.value.trim();
+            
+            if (message === '') return;
+            
+            const chatBody = document.getElementById('chat-body');
+            
+            // Add user message
+            const userMsg = document.createElement('p');
+            userMsg.className = 'user-msg';
+            userMsg.textContent = message;
+            chatBody.appendChild(userMsg);
+            
+            // Clear input
+            input.value = '';
+            
+            // Bot response
+            setTimeout(() => {
+                const botMsg = document.createElement('p');
+                botMsg.className = 'bot-msg';
+                
+                const lowerMsg = message.toLowerCase();
+                
+                // Check for timing related queries
+                if (lowerMsg.includes('time') || lowerMsg.includes('open') || lowerMsg.includes('close')) {
+                    botMsg.textContent = "🕒 Canteen timings: 11:00 AM to 4:00 PM (Monday to Saturday)";
+                }
+                // Check for specials
+                else if (lowerMsg.includes('special') || lowerMsg.includes('today')) {
+                    botMsg.textContent = "🍛 Today's Specials:\n• Chole Bhature - ₹60\n• Pav Bhaji - ₹60\n• South Indian Combo - ₹60";
+                } 
+                // Check for menu
+                else if (lowerMsg.includes('menu') || lowerMsg.includes('items')) {
+                    botMsg.textContent = "📋 We have:\n• Breakfast items (₹20-₹60)\n• Main Meals (₹45-₹80)\n• Chinese (₹40-₹60)\n• Snacks (₹20-₹60)\n• Beverages (₹10-₹50)";
+                }
+                // Check for prices
+                else if (lowerMsg.includes('price') || lowerMsg.includes('cost')) {
+                    botMsg.textContent = "💰 Price range: ₹10 to ₹80. Most items are between ₹30-₹60!";
+                }
+                // Check for combos
+                else if (lowerMsg.includes('combo') || lowerMsg.includes('offer')) {
+                    botMsg.textContent = "🎉 Student Combos:\n• Maggi + Chai: ₹45\n• 2 Samosa + Chai: ₹35\n• Thali + Lassi: ₹100";
+                }
+                // Check for location
+                else if (lowerMsg.includes('where') || lowerMsg.includes('location')) {
+                    botMsg.textContent = "📍 We're located near the main college building, next to the library!";
+                }
+                // Greetings
+                else if (lowerMsg.includes('hello') || lowerMsg.includes('hi') || lowerMsg.includes('hey')) {
+                    botMsg.textContent = "👋 Hello! Canteen is open 11 AM - 4 PM. What would you like to order?";
+                }
+                // Thank you
+                else if (lowerMsg.includes('thank')) {
+                    botMsg.textContent = "😊 You're welcome! Enjoy your meal!";
+                }
+                // Default response
+                else {
+                    botMsg.textContent = "Thanks for your message! I can help you with:\n• Menu items\n• Prices\n• Timings (11 AM - 4 PM)\n• Today's specials\n• Student combos";
+                }
+                
+                chatBody.appendChild(botMsg);
+                chatBody.scrollTop = chatBody.scrollHeight;
+            }, 500);
+            
+            chatBody.scrollTop = chatBody.scrollHeight;
+        }
+
+        // Handle Enter key in chat input
+        document.addEventListener('DOMContentLoaded', function() {
+            const chatInput = document.getElementById('user-input');
+            if (chatInput) {
+                chatInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        sendMessage();
+                    }
+                });
+            }
+        });
+
+        // Handle image errors
+        document.querySelectorAll('img').forEach(img => {
+            img.onerror = function() {
+                this.src = 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%23d63031\'/%3E%3Ctext x=\'50\' y=\'120\' fill=\'white\' font-size=\'24\'%3E🍽️ Food%3C/text%3E%3C/svg%3E';
+            };
+        });
+
+        // Close sidebar when clicking on overlay
+        document.getElementById('overlay').addEventListener('click', function() {
+            toggleSidebar();
+        });
+
+        // Check canteen status on page load
+        function checkCanteenStatus() {
+            const now = new Date();
+            const hour = now.getHours();
+            const statusElement = document.querySelector('.timing-info');
+            
+            if (hour >= 11 && hour < 16) {
+                statusElement.innerHTML = '<i class="fas fa-clock"></i> Open Now: 11:00 AM - 4:00 PM <i class="fas fa-check-circle" style="color: #2ecc71; margin-left: 10px;"></i>';
+                statusElement.style.background = 'rgba(46, 204, 113, 0.2)';
+            } else {
+                statusElement.innerHTML = '<i class="fas fa-clock"></i> Closed: Opens at 11:00 AM <i class="fas fa-times-circle" style="color: #e74c3c; margin-left: 10px;"></i>';
+                statusElement.style.background = 'rgba(231, 76, 60, 0.2)';
+            }
+        }
+
+        // Call status check on load
+        document.addEventListener('DOMContentLoaded', function() {
+            checkCanteenStatus();
+        });
+    </script>
 </body>
 </html>
