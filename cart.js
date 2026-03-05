@@ -1,5 +1,11 @@
 // Wait for DOM to load
 document.addEventListener('DOMContentLoaded', function() {
+    // --- THE GHOST KILLER ---
+    // This forces the price back to 0 every time you refresh/open the page
+    localStorage.setItem('totalPrice', '0'); 
+    localStorage.setItem('canteenCart', JSON.stringify([]));
+    
+    // ... rest of your code ...
     const cartBar = document.getElementById('cart-bar');
     const cartCountDisplay = document.getElementById('cart-count');
     const totalPriceDisplay = document.getElementById('total-price');
