@@ -1307,9 +1307,10 @@
             toggleSidebar();
         }
 
+        // UPDATED FUNCTION: Redirects to previous.html instead of showing alert
         function showPreviousOrders() {
-            alert('📋 Your Previous Orders:\n\n1. Veg Biryani + Cold Drink - ₹90\n2. Pav Bhaji - ₹60\n3. Chole Bhature - ₹60');
-                        toggleSidebar();
+            window.location.href = 'previous.html';
+            toggleSidebar(); // Close sidebar after navigation
         }
 
         function showCombos() {
@@ -1327,11 +1328,10 @@
             toggleSidebar();
         }
 
+        // UPDATED LOGOUT FUNCTION: Redirects to login page (index.html)
         function logout() {
             if (confirm('Are you sure you want to logout?')) {
-                alert('👋 Logged out successfully!');
-                // In a real app, you'd redirect to login page
-                window.location.reload();
+                window.location.href = 'index.html'; // Redirect to login page
             }
         }
 
