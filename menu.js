@@ -73,13 +73,12 @@ function logout() {
     }
 }
 
-// Cart functions
 function addToCart(itemName, price, button) {
-    // Check if canteen is open (11 AM - 4 PM)
+    // Check if canteen is open (11 AM - 6 PM)
     const now = new Date();
     const hour = now.getHours();
-    if (hour < 11 || hour >= 16) {
-        alert('🕒 Canteen is currently closed! Open from 11 AM to 4 PM.');
+    if (hour < 11 || hour >= 18) {
+        alert('🕒 Canteen is currently closed! Open from 11 AM to 6 PM.');
         return;
     }
 
@@ -227,8 +226,8 @@ function viewCart() {
     // Check if canteen is open before checkout
     const now = new Date();
     const hour = now.getHours();
-    if (hour < 11 || hour >= 16) {
-        alert('🕒 Canteen is closed! Orders can only be placed between 11 AM - 4 PM.');
+    if (hour < 11 || hour >= 18) {
+        alert('🕒 Canteen is closed! Orders can only be placed between 11 AM - 6 PM.');
         return;
     }
     
@@ -327,7 +326,7 @@ function sendMessage() {
         const lowerMsg = message.toLowerCase();
         
         if (lowerMsg.includes('time') || lowerMsg.includes('open') || lowerMsg.includes('close')) {
-            botMsg.textContent = "🕒 Canteen timings: 11:00 AM to 4:00 PM (Monday to Saturday)";
+            botMsg.textContent = "🕒 Canteen timings: 11:00 AM to 6:00 PM (Monday to Saturday)";
         }
         else if (lowerMsg.includes('special') || lowerMsg.includes('today')) {
             botMsg.textContent = "🍛 Today's Specials:\n• Chole Bhature - ₹60\n• Pav Bhaji - ₹60\n• South Indian Combo - ₹60";
@@ -345,13 +344,13 @@ function sendMessage() {
             botMsg.textContent = "📍 We're located near the main college building, next to the library!";
         }
         else if (lowerMsg.includes('hello') || lowerMsg.includes('hi') || lowerMsg.includes('hey')) {
-            botMsg.textContent = "👋 Hello! Canteen is open 11 AM - 4 PM. What would you like to order?";
+            botMsg.textContent = "👋 Hello! Canteen is open 11 AM - 6 PM. What would you like to order?";
         }
         else if (lowerMsg.includes('thank')) {
             botMsg.textContent = "😊 You're welcome! Enjoy your meal!";
         }
         else {
-            botMsg.textContent = "Thanks for your message! I can help you with:\n• Menu items\n• Prices\n• Timings (11 AM - 4 PM)\n• Today's specials\n• Student combos";
+            botMsg.textContent = "Thanks for your message! I can help you with:\n• Menu items\n• Prices\n• Timings (11 AM - 6 PM)\n• Today's specials\n• Student combos";
         }
         
         chatBody.appendChild(botMsg);
@@ -368,8 +367,8 @@ function checkCanteenStatus() {
     const statusElement = document.getElementById('timing-info');
     
     if (statusElement) {
-        if (hour >= 11 && hour < 16) {
-            statusElement.innerHTML = '<i class="fas fa-clock"></i> Open Now: 11:00 AM - 4:00 PM <i class="fas fa-check-circle" style="color: #2ecc71; margin-left: 10px;"></i>';
+        if (hour >= 11 && hour < 18) {
+            statusElement.innerHTML = '<i class="fas fa-clock"></i> Open Now: 11:00 AM - 6:00 PM <i class="fas fa-check-circle" style="color: #2ecc71; margin-left: 10px;"></i>';
             statusElement.style.background = 'rgba(46, 204, 113, 0.2)';
         } else {
             statusElement.innerHTML = '<i class="fas fa-clock"></i> Closed: Opens at 11:00 AM <i class="fas fa-times-circle" style="color: #e74c3c; margin-left: 10px;"></i>';
