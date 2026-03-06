@@ -5,7 +5,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Load all previous orders
 function loadPreviousOrders() {
-    const orders = JSON.parse(localStorage.getItem('previousOrders')) || [];
+    // Try to get orders from multiple possible storage keys
+    let orders = JSON.parse(localStorage.getItem('previousOrders')) || 
+                 JSON.parse(localStorage.getItem('allOrders')) || 
+                 [];
+    
+    console.log('Loaded orders:', orders); // For debugging
     displayOrders(orders);
     updateFilterButtons('all');
 }
@@ -14,7 +19,7 @@ function loadPreviousOrders() {
 function displayOrders(orders) {
     const ordersList = document.getElementById('orders-list');
     
-    if (orders.length === 0) {
+    if (!orders || orders.length === 0) {
         ordersList.innerHTML = `
             <div class="empty-state">
                 <i class="fas fa-receipt"></i>
@@ -33,25 +38,51 @@ function displayOrders(orders) {
 
 // Create HTML for a single order card
 function createOrderCard(order) {
-    const statusClass = order.status === 'Processing' ? 'processing' : 'completed';
+    const statusClass = order.status === 'Processing' ? 'processing' : 
+                       (order.status === 'Pending' ? 'processing' : 'completed');
+    
     const paymentClass = order.method === 'online' ? 'online' : 'counter';
     const paymentIcon = order.method === 'online' ? '📱' : '💵';
-    const statusIcon = order.status === 'Processing' ? '⏳' : '✅';
+    const statusIcon = order.status === 'Processing' || order.status === 'Pending' ? '⏳' : '✅';
     
-    const itemsList = order.items.map(item => 
-        `<div class="order-item">
-            <span>${item.name} x${item.quantity || 1}</span>
-            <span>₹${item.price * (item.quantity || 1)}</span>
-        </div>`
-    ).join('');
+    // Get the total amount - check multiple possible keys
+    const totalAmount = order.amount || order.totalAmount || order.total || 0;
+    
+    // Create items list HTML
+    let itemsList = '';
+    if (order.items && order.items.length > 0) {
+        // Group items by name
+        const itemCounts = {};
+        order.items.forEach(item => {
+            const itemName = item.name || 'Item';
+            if (!itemCounts[itemName]) {
+                itemCounts[itemName] = {
+                    count: 1,
+                    price: item.price || 0
+                };
+            } else {
+                itemCounts[itemName].count++;
+            }
+        });
+        
+        // Generate HTML for each item
+        Object.entries(itemCounts).forEach(([name, data]) => {
+            itemsList += `
+                <div class="order-item">
+                    <span>${name} x${data.count}</span>
+                    <span>₹${(data.price * data.count).toFixed(2)}</span>
+                </div>
+            `;
+        });
+    }
     
     return `
         <div class="order-card ${statusClass}" data-status="${order.status}">
             <div class="order-header">
-                <span class="token">#${order.token}</span>
+                <span class="token">#${order.token || 'N/A'}</span>
                 <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
                     <span class="status-badge ${statusClass}">
-                        ${statusIcon} ${order.status}
+                        ${statusIcon} ${order.status || 'Pending'}
                     </span>
                     <span class="payment-method ${paymentClass}">
                         ${paymentIcon} ${order.method === 'online' ? 'UPI' : 'Counter'}
@@ -60,7 +91,7 @@ function createOrderCard(order) {
             </div>
             
             <div class="order-items">
-                ${itemsList}
+                ${itemsList || '<div class="order-item">No items</div>'}
             </div>
             
             <div class="order-footer">
@@ -69,7 +100,7 @@ function createOrderCard(order) {
                         <i class="far fa-clock"></i> ${order.time || order.paymentTime || ''}
                     </span>
                 </div>
-                <span class="total">₹${order.amount}</span>
+                <span class="total">₹${totalAmount.toFixed(2)}</span>
             </div>
         </div>
     `;
@@ -77,13 +108,18 @@ function createOrderCard(order) {
 
 // Filter orders by status
 function filterOrders(status) {
-    const orders = JSON.parse(localStorage.getItem('previousOrders')) || [];
+    const orders = JSON.parse(localStorage.getItem('previousOrders')) || 
+                   JSON.parse(localStorage.getItem('allOrders')) || 
+                   [];
+    
     updateFilterButtons(status);
     
     if (status === 'all') {
         displayOrders(orders);
     } else {
-        const filteredOrders = orders.filter(order => order.status === status);
+        const filteredOrders = orders.filter(order => 
+            order.status && order.status.toLowerCase() === status.toLowerCase()
+        );
         displayOrders(filteredOrders);
     }
 }
@@ -101,28 +137,3 @@ function updateFilterButtons(activeStatus) {
         }
     });
 }
-
-// Add a test order for demonstration (remove in production)
-function addTestOrder() {
-    const testOrder = {
-        token: 'TK' + Math.floor(Math.random() * 1000),
-        items: [
-            { name: 'Veg Sandwich', price: 35, quantity: 2 },
-            { name: 'Cold Coffee', price: 40, quantity: 1 }
-        ],
-        amount: 110,
-        method: 'online',
-        status: 'Processing',
-        time: new Date().toLocaleTimeString(),
-        date: new Date().toLocaleDateString(),
-        orderId: 'ORD' + Date.now()
-    };
-    
-    let orders = JSON.parse(localStorage.getItem('previousOrders')) || [];
-    orders.push(testOrder);
-    localStorage.setItem('previousOrders', JSON.stringify(orders));
-    loadPreviousOrders();
-}
-
-// Uncomment below line to add test order (for testing only)
-// document.addEventListener('DOMContentLoaded', addTestOrder);

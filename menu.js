@@ -234,6 +234,11 @@ function viewCart() {
     // Calculate total
     const total = cart.reduce((sum, item) => sum + item.price, 0);
     
+    // ✅ FIX: Save cart data BEFORE redirecting
+    localStorage.setItem('quickbite_cart', JSON.stringify(cart));
+    localStorage.setItem('orderTotal', total.toString());
+    localStorage.setItem('totalPrice', total.toString());
+    
     // Generate token number
     const token = 'TK' + Math.floor(Math.random() * 1000);
     
@@ -265,10 +270,6 @@ function viewCart() {
     let allOrders = JSON.parse(localStorage.getItem('allOrders')) || [];
     allOrders.push(orderDetails);
     localStorage.setItem('allOrders', JSON.stringify(allOrders));
-    
-    // Save cart items for checkout page
-    localStorage.setItem('quickbite_cart', JSON.stringify(cart));
-    localStorage.setItem('totalPrice', total.toString());
     
     // Show order summary
     let orderSummary = '🧾 ORDER SUMMARY\n\n';

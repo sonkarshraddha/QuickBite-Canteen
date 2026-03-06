@@ -74,34 +74,40 @@ function displayOrders(orders) {
         const orderTime = order.time || order.paymentTime || new Date().toLocaleTimeString();
         const statusClass = getStatusClass(order.status);
         
+        // ✅ FIX: Get the correct amount - check multiple possible keys
+        const amount = getOrderAmount(order);
+        
         activeTable.innerHTML += `
             <tr>
                 <td><span class="token-badge">#${order.token || 'TK' + (index+1)}</span></td>
                 <td>${itemsText}</td>
-                <td><b>₹${order.amount || 0}</b></td>
+                <td><b>₹${amount}</b></td>
                 <td>${orderTime}</td>
                 <td><span class="method-tag ${order.method === 'online' ? 'upi' : 'cash'}">
                     ${order.method === 'online' ? '📱 UPI' : '💵 CASH'}
                 </span></td>
                 <td><span class="status-badge ${statusClass}">${order.status || 'Processing'}</span></td>
                 <td class="action-btns">
-                    ${getActionButtons(order, orders.indexOf(order))}
+                    ${getActionButtons(order, index)}
                 </td>
             </tr>
         `;
     });
 
     // Display all orders in payment history
-    orders.forEach((order) => {
+    orders.forEach((order, index) => {
         const itemsText = formatItems(order.items);
         const orderTime = order.time || order.paymentTime || new Date().toLocaleTimeString();
         const statusClass = getStatusClass(order.status);
         
+        // ✅ FIX: Get the correct amount - check multiple possible keys
+        const amount = getOrderAmount(order);
+        
         paymentTable.innerHTML += `
             <tr>
-                <td><span class="token-badge">#${order.token || 'N/A'}</span></td>
+                <td><span class="token-badge">#${order.token || 'TK' + (index+1)}</span></td>
                 <td>${itemsText}</td>
-                <td><b>₹${order.amount || 0}</b></td>
+                <td><b>₹${amount}</b></td>
                 <td><span class="method-tag ${order.method === 'online' ? 'upi' : 'cash'}">
                     ${order.method === 'online' ? '📱 UPI' : '💵 CASH'}
                 </span></td>
@@ -112,12 +118,49 @@ function displayOrders(orders) {
     });
 }
 
+// ✅ NEW FUNCTION: Get amount from order checking all possible keys
+function getOrderAmount(order) {
+    // Try all possible keys where amount might be stored
+    const possibleAmounts = [
+        order.amount,
+        order.totalAmount,
+        order.total,
+        order.finalAmount,
+        order.payAmount,
+        order.subtotal ? order.subtotal + (order.gst || 0) + (order.serviceTax || 0) : null
+    ];
+    
+    // Find the first valid number
+    for (let amount of possibleAmounts) {
+        if (amount !== undefined && amount !== null && !isNaN(amount) && parseFloat(amount) > 0) {
+            return parseFloat(amount).toFixed(2);
+        }
+    }
+    
+    // If no amount found, try to calculate from items
+    if (order.items && order.items.length > 0) {
+        const calculatedTotal = order.items.reduce((sum, item) => {
+            const price = item.price || 0;
+            const qty = item.quantity || 1;
+            return sum + (price * qty);
+        }, 0);
+        
+        if (calculatedTotal > 0) {
+            return calculatedTotal.toFixed(2);
+        }
+    }
+    
+    return "0.00";
+}
+
 function formatItems(items) {
     if (!items || items.length === 0) return "Order items";
     
     return items.map(item => {
         if (typeof item === 'object') {
-            return `${item.name || 'Item'} (x${item.quantity || 1})`;
+            const itemName = item.name || 'Item';
+            const quantity = item.quantity || 1;
+            return `${itemName} (x${quantity})`;
         }
         return item;
     }).join(", ");
@@ -156,7 +199,9 @@ function updateStats(orders) {
     let readyCount = 0;
     
     orders.forEach(order => {
-        revenue += parseFloat(order.amount) || 0;
+        // ✅ FIX: Use the same amount function for revenue calculation
+        const amount = parseFloat(getOrderAmount(order)) || 0;
+        revenue += amount;
         
         if (order.status === 'Processing') {
             processingCount++;
@@ -167,7 +212,7 @@ function updateStats(orders) {
 
     document.getElementById('stat-count').innerText = processingCount;
     document.getElementById('ready-count').innerText = readyCount;
-    document.getElementById('stat-revenue').innerText = "₹" + revenue;
+    document.getElementById('stat-revenue').innerText = "₹" + revenue.toFixed(2);
     document.getElementById('total-orders').innerText = orders.length;
 }
 
@@ -190,7 +235,8 @@ function markReady(index) {
         loadData();
         
         // Show notification
-        showNotification(`✅ Order #${orders[index].token} is ready for pickup!`, "#3498db");
+        const amount = getOrderAmount(orders[index]);
+        showNotification(`✅ Order #${orders[index].token} (₹${amount}) is ready for pickup!`, "#3498db");
     }
 }
 
@@ -213,7 +259,8 @@ function markCompleted(index) {
         loadData();
         
         // Show notification
-        showNotification(`✅ Order #${orders[index].token} completed!`, "#27ae60");
+        const amount = getOrderAmount(orders[index]);
+        showNotification(`✅ Order #${orders[index].token} (₹${amount}) completed!`, "#27ae60");
     }
 }
 
@@ -252,7 +299,18 @@ function logout() {
 function showNotification(message, color) {
     const notification = document.createElement('div');
     notification.className = 'notification';
-    notification.style.background = color;
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: ${color};
+        color: white;
+        padding: 15px 25px;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        z-index: 9999;
+        animation: slideIn 0.3s ease;
+    `;
     notification.innerHTML = `<i class="fas fa-info-circle"></i> ${message}`;
     document.body.appendChild(notification);
     
@@ -260,6 +318,22 @@ function showNotification(message, color) {
         notification.remove();
     }, 3000);
 }
+
+// Add CSS animation
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+`;
+document.head.appendChild(style);
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {

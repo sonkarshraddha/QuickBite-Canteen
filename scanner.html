@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuickBite | QR Scanner</title>
+    <link rel="stylesheet" href="menu.css">
+    <style>
+        .scanner-container {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        #qr-reader {
+            width: 100%;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+        
+        #qr-reader-results {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f0f0f0;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+        
+        .success {
+            color: #27ae60;
+            font-weight: bold;
+        }
+        
+        .error {
+            color: #e74c3c;
+        }
+        
+        .back-btn {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 25px;
+            background: #d63031;
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="content-wrapper">
+        <div class="scanner-container">
+            <h2 style="color: #d63031; text-align: center;">📱 Scan QR Code</h2>
+            <p style="text-align: center; color: #636e72;">Scan a QR code to open the canteen website</p>
+            
+            <!-- QR Scanner will be inserted here -->
+            <div id="qr-reader"></div>
+            <div id="qr-reader-results">Waiting for scan...</div>
+            
+            <div style="text-align: center;">
+                <a href="menu.html" class="back-btn">← Back to Menu</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Include the library -->
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    
+    <script>
+        function docReady(fn) {
+            if (document.readyState === "complete" || document.readyState === "interactive") {
+                setTimeout(fn, 1);
+            } else {
+                document.addEventListener("DOMContentLoaded", fn);
+            }
+        }
+
+        docReady(function() {
+            var resultContainer = document.getElementById('qr-reader-results');
+            
+            var html5QrcodeScanner = new Html5QrcodeScanner(
+                "qr-reader", 
+                { 
+                    fps: 10,        // Frames per second
+                    qrbox: 250,      // Scanning box size
+                    rememberLastUsedCamera: true,
+                    showTorchButtonIfSupported: true
+                }
+            );
+
+            function onScanSuccess(decodedText, decodedResult) {
+                // Clear the scanner after successful scan
+                html5QrcodeScanner.clear();
+                
+                // Show success message
+                resultContainer.innerHTML = `<span class="success">✅ QR Code detected!</span><br>Content: ${decodedText}`;
+                
+                // Check if it's a URL and redirect
+                if (decodedText.startsWith('http')) {
+                    resultContainer.innerHTML += `<br><br>Redirecting to website...`;
+                    setTimeout(() => {
+                        window.location.href = decodedText;
+                    }, 1500);
+                } else {
+                    resultContainer.innerHTML += `<br><br>Not a valid website URL`;
+                }
+            }
+
+            function onScanError(errorMessage) {
+                // Optional: handle scan errors silently
+                // console.warn(errorMessage);
+            }
+
+            html5QrcodeScanner.render(onScanSuccess, onScanError);
+        });
+    </script>
+</body>
+</html>
