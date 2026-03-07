@@ -24,7 +24,7 @@
 
 @keyframes backgroundChange {
     0%, 100% { background-image: url('r.jpg.png'); }
-    33% { background-image: url('n.jpg.png'); }
+    
     66% { background-image: url('u.jpg.png'); }
 }
 

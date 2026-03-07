@@ -3,17 +3,590 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QuickBite | Login</title>
-    <link rel="stylesheet" href="style.css">
+    <title>VP Canteen | Vidyalankar Polytechnic</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        /* Additional styles for role selector */
-        .role-selector {
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: #faf7f2;
+        }
+
+        /* Navigation Bar */
+        .navbar {
             display: flex;
             justify-content: space-between;
+            align-items: center;
+            padding: 15px 50px;
+            background: white;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .college-logo-img {
+            height: 50px;
+            width: auto;
+            object-fit: contain;
+        }
+
+        .canteen-name {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #2d3436;
+            border-left: 2px solid #d63031;
+            padding-left: 15px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #2d3436;
+            font-weight: 500;
+            transition: 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: #d63031;
+        }
+
+        .user-icon {
+            width: 45px;
+            height: 45px;
+            background: #d63031;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.3rem;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 5px 15px rgba(214, 48, 49, 0.3);
+        }
+
+        .user-icon:hover {
+            transform: scale(1.1);
+            background: #ff6b81;
+        }
+
+        /* Hero Section - Interactive Red Background */
+        .hero {
+            height: 80vh;
+            background: linear-gradient(135deg, #d63031 0%, #ff6b81 50%, #d63031 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 10s ease infinite;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Animated shapes in background */
+        .hero::before {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background: rgba(255,255,255,0.1);
+            transform: rotate(45deg);
+            animation: shimmer 15s linear infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: rotate(45deg) translateX(-100%); }
+            100% { transform: rotate(45deg) translateX(100%); }
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 800px;
+            padding: 0 20px;
+        }
+
+        .hero-content h1 {
+            font-size: 5rem;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 10px rgba(0,0,0,0.3);
+            animation: fadeInUp 1s ease;
+        }
+
+        .hero-content p {
+            font-size: 1.5rem;
+            margin-bottom: 30px;
+            opacity: 0.95;
+            animation: fadeInUp 1s ease 0.2s both;
+        }
+
+        .hero-btn {
+            padding: 18px 50px;
+            background: white;
+            color: #d63031;
+            border: none;
+            border-radius: 60px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            animation: fadeInUp 1s ease 0.4s both;
+        }
+
+        .hero-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+            background: #ffd32a;
+            color: #d63031;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* What's Happening Section */
+        .section {
+            padding: 80px 50px;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            color: #2d3436;
+            margin-bottom: 20px;
+            position: relative;
+            display: inline-block;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 60px;
+            height: 3px;
+            background: #d63031;
+        }
+
+        .events-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 50px;
+        }
+
+        .event-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            transition: 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+
+        .event-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(214, 48, 49, 0.1);
+            border-bottom-color: #d63031;
+        }
+
+        .event-date {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #d63031;
+            margin-bottom: 10px;
+        }
+
+        .event-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .event-desc {
+            color: #636e72;
+            line-height: 1.6;
+        }
+
+        /* About Canteen - Our Story */
+        .story-section {
+            background: white;
+            padding: 80px 50px;
+        }
+
+        .story-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .story-content h2 {
+            font-size: 2rem;
+            color: #2d3436;
+            margin-bottom: 20px;
+        }
+
+        .story-content p {
+            color: #636e72;
+            line-height: 1.8;
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+        }
+
+        .founder-note {
+            background: #faf7f2;
+            padding: 30px;
+            border-radius: 20px;
+            margin-top: 30px;
+            border-left: 5px solid #d63031;
+        }
+
+        .founder-note p {
+            font-style: italic;
+            margin-bottom: 15px;
+        }
+
+        .founder-name {
+            font-weight: bold;
+            color: #2d3436;
+        }
+
+        /* Kitchen & Cleanliness */
+        .kitchen-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            margin-top: 50px;
+        }
+
+        .kitchen-card {
+            text-align: center;
+            padding: 30px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            transition: 0.3s;
+        }
+
+        .kitchen-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(214, 48, 49, 0.1);
+        }
+
+        .kitchen-icon {
+            width: 100px;
+            height: 100px;
+            background: #fff5f5;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 2.5rem;
+            color: #d63031;
+            transition: 0.3s;
+        }
+
+        .kitchen-card:hover .kitchen-icon {
+            background: #d63031;
+            color: white;
+            transform: rotate(360deg);
+        }
+
+        .kitchen-card h3 {
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+        }
+
+        .kitchen-card p {
+            color: #636e72;
+        }
+
+        /* Staff Section */
+        .staff-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin-top: 50px;
+        }
+
+        .staff-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            text-align: center;
+            transition: 0.3s;
+        }
+
+        .staff-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(214, 48, 49, 0.1);
+        }
+
+        .staff-img {
+            width: 100%;
+            height: 250px;
+            background: linear-gradient(135deg, #d63031, #ff6b81);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 5rem;
+            color: white;
+        }
+
+        .staff-info {
+            padding: 20px;
+        }
+
+        .staff-info h3 {
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+        }
+
+        .staff-info p {
+            color: #636e72;
+            font-size: 0.9rem;
+        }
+
+        /* Testimonials */
+        .testimonials {
+            background: white;
+            padding: 80px 50px;
+            text-align: center;
+        }
+
+        .testimonial-card {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px;
+            background: linear-gradient(135deg, #fff5f5, white);
+            border-radius: 30px;
+            box-shadow: 0 20px 40px rgba(214, 48, 49, 0.1);
+        }
+
+        .testimonial-text {
+            font-size: 1.3rem;
+            font-style: italic;
+            color: #2d3436;
+            margin-bottom: 20px;
+        }
+
+        .testimonial-author {
+            font-weight: bold;
+            color: #d63031;
+        }
+
+        /* Footer / Contact */
+        .footer {
+            background: #2d3436;
+            color: white;
+            padding: 60px 50px 30px;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer-col h3 {
+            color: #d63031;
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+        }
+
+        .footer-col p, .footer-col a {
+            color: #b2bec3;
+            line-height: 2;
+            text-decoration: none;
+            display: block;
+        }
+
+        .footer-col a:hover {
+            color: #d63031;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .social-links a {
+            width: 40px;
+            height: 40px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            transition: 0.3s;
+        }
+
+        .social-links a:hover {
+            background: #d63031;
+            transform: translateY(-3px);
+        }
+
+        .copyright {
+            text-align: center;
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            color: #636e72;
+        }
+
+        /* Modal for Login & Register */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(5px);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 40px;
+            border-radius: 30px;
+            max-width: 450px;
+            width: 90%;
+            position: relative;
+            animation: modalPop 0.3s ease;
+            border-top: 5px solid #d63031;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        @keyframes modalPop {
+            from {
+                transform: scale(0.9);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 28px;
+            cursor: pointer;
+            color: #d63031;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: #f1f1f1;
+            transition: 0.3s;
+        }
+
+        .modal-close:hover {
+            background: #d63031;
+            color: white;
+        }
+
+        .modal h2 {
+            color: #d63031;
+            margin-bottom: 20px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .modal input {
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            border: 2px solid #eee;
+            border-radius: 12px;
+            font-size: 15px;
+            transition: 0.3s;
+        }
+
+        .modal input:focus {
+            border-color: #d63031;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(214, 48, 49, 0.1);
+        }
+
+        .modal button {
+            width: 100%;
+            padding: 15px;
+            background: #d63031;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: 0.3s;
+        }
+
+        .modal button:hover {
+            background: #ff6b81;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(214, 48, 49, 0.3);
+        }
+
+        .role-selector {
+            display: flex;
             gap: 10px;
             margin: 15px 0;
         }
-        
+
         .role-option {
             flex: 1;
             padding: 12px;
@@ -21,107 +594,346 @@
             border-radius: 12px;
             cursor: pointer;
             text-align: center;
-            transition: all 0.3s;
-            background: white;
+            transition: 0.3s;
         }
-        
+
         .role-option:hover {
-            border-color: #ff7675;
-            transform: translateY(-2px);
+            border-color: #d63031;
         }
-        
+
         .role-option.selected {
             border-color: #d63031;
             background: #fff5f5;
-            box-shadow: 0 4px 10px rgba(214, 48, 49, 0.1);
         }
-        
-        .role-option i {
-            font-size: 24px;
-            display: block;
-            margin-bottom: 5px;
+
+        .switch-link {
+            text-align: center;
+            margin-top: 20px;
+            color: #636e72;
         }
-        
-        .role-option span {
-            font-size: 14px;
-            font-weight: bold;
+
+        .switch-link a {
+            color: #d63031;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
         }
-        
-        .role-option small {
-            font-size: 11px;
-            color: #7f8c8d;
-            display: block;
+
+        .switch-link a:hover {
+            text-decoration: underline;
         }
-        
+
         .admin-note {
             background: #f1f3f4;
             border-radius: 8px;
-            padding: 8px;
+            padding: 10px;
             margin: 10px 0;
             font-size: 12px;
             color: #636e72;
+            text-align: center;
         }
-        
-        .admin-note i {
-            color: #d63031;
+
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                gap: 15px;
+                padding: 15px;
+            }
+            
+            .nav-links {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .story-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .kitchen-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .hero-content h1 {
+                font-size: 2.5rem;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="full-screen-bg">
-        <div class="login-popup">
-            <form id="loginForm">
-                <div style="font-size: 40px;">🍱</div>
-                <h2 style="color: #ff4757;">QuickBite Login</h2>
-                <p>Log in with your college ID</p>
-                
-                <!-- Role Selection -->
-                <div class="role-selector">
-                    <div class="role-option selected" id="role-student" onclick="selectRole('student')">
-                        <i>👨‍🎓</i>
-                        <span>Student</span>
-                        <small>Meal orders</small>
-                    </div>
-                    <div class="role-option" id="role-staff" onclick="selectRole('staff')">
-                        <i>👨‍🏫</i>
-                        <span>Staff</span>
-                        <small>Faculty meals</small>
-                    </div>
-                    <div class="role-option" id="role-admin" onclick="selectRole('admin')">
-                        <i>⚙️</i>
-                        <span>Admin</span>
-                        <small>Management</small>
-                    </div>
-                </div>
-                
-                <!-- Admin Note (hidden by default) -->
-                <div class="admin-note" id="admin-note" style="display: none;">
-                    <i class="fas fa-info-circle"></i> Admin: Use admin@canteen.com / admin123
-                </div>
-                
-                <input type="email" id="email" placeholder="College Email" required>
-                <input type="password" id="password" placeholder="Password" required>
-                
-                <button type="submit" id="login-button">Let's Eat! 🚀</button>
-                <p style="margin-top: 15px; font-size: 14px;">
-                    Don't have an account? <a href="register.html">Register here</a>
-                </p>
-            </form>
+    <!-- Navigation Bar -->
+    <div class="navbar">
+        <div class="logo-container">
+            <!-- Place your logo here - save as college-logo.png in your folder -->
+            <img src="college-logo.jpeg" alt="VP Logo" class="college-logo-img" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'50\' height=\'50\' viewBox=\'0 0 100 100\'%3E%3Crect width=\'100\' height=\'100\' fill=\'%23d63031\'/%3E%3Ctext x=\'20\' y=\'65\' fill=\'white\' font-size=\'40\' font-weight=\'bold\'%3EVP%3C/text%3E%3C/svg%3E'">
+            <div class="canteen-name">Canteen</div>
+        </div>
+        <div class="nav-links">
+            <a href="#home">Home</a>
+            <a href="#about">About</a>
+            <a href="#menu">Menu</a>
+            <a href="#events">Events</a>
+            <a href="#contact">Contact</a>
+            <div class="user-icon" onclick="openLoginModal()">
+                <i class="fas fa-user"></i>
+            </div>
         </div>
     </div>
-    
-    <script>
-        // Role selection state
-        let selectedRole = 'student'; // Default role
+
+    <!-- Hero Section - Interactive Red Background -->
+    <section class="hero" id="home">
+        <div class="hero-content">
+            <h1>QuickBite</h1>
+            <p>Fresh. Affordable. Hygienic. Since 2010</p>
+            <button class="hero-btn" onclick="openLoginModal()">Order Online →</button>
+        </div>
+    </section>
+
+    <!-- What's Happening Section -->
+    <section class="section" id="events">
+        <h2 class="section-title">What's Happening</h2>
+        <p style="color: #636e72; margin-bottom: 30px;">A Month of Celebrations at VP Canteen</p>
+
+        <div class="events-grid">
+            <div class="event-card">
+                <div class="event-date">01</div>
+                <div class="event-title">Canteen Open House</div>
+                <div class="event-desc">1st February - Meet our chefs, see our kitchen, taste our specials</div>
+            </div>
+            <div class="event-card">
+                <div class="event-date">02</div>
+                <div class="event-title">Student Food Festival</div>
+                <div class="event-desc">15th February - Student chefs compete for the best dish</div>
+            </div>
+            <div class="event-card">
+                <div class="event-date">03</div>
+                <div class="event-title">10 Years Celebration</div>
+                <div class="event-desc">28th February - Special menu, live music, and surprises</div>
+            </div>
+        </div>
         
+        <div style="text-align: center; margin-top: 40px;">
+            <button class="hero-btn" style="padding: 12px 30px;" onclick="openLoginModal()">Join the Celebration →</button>
+        </div>
+    </section>
+
+    <!-- Our Story Section -->
+    <section class="story-section" id="about">
+        <div class="story-container">
+            <div class="story-content">
+                <h2>Ten Years of our Canteen</h2>
+                <p>Ten years. TEN YEARS! Some days, it feels like we've been at this for a hundred. Other days, it feels like we're novices wondering how we got here. This decade has been everything — exhilarating, maddening, joyous.</p>
+                <p>We've served you plates we're insanely proud of, and meals that are still the talk of the campus. But let's be real: it also hasn't been all smooth sailing. For every "OMG-this-is-amazing" moment, there were about ten "What the hell were we thinking?!" ones.</p>
+                <p>Here's to ten years of flavour, failure, and fabulous memories — and to the laughter that made it all worth it.</p>
+                
+                <div class="founder-note">
+                    <p>"From food that flopped to ideas that fizzled, from students who became regulars to those who ended up on our 'never again' list — we've cherished every hit and every miss. All of it led to the creation of something that's now part of this college's soul."</p>
+                    <div class="founder-name">— Canteen Staff</div>
+                </div>
+            </div>
+            <div style="background: linear-gradient(135deg, #d63031, #ff6b81); border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 10rem; color: white;">
+                <i class="fas fa-utensils"></i>
+            </div>
+        </div>
+    </section>
+
+    <!-- Kitchen & Cleanliness -->
+    <section class="section">
+        <h2 class="section-title">Our Kitchen & Cleanliness</h2>
+        <p style="color: #636e72; margin-bottom: 30px;">Grade-A hygiene certified kitchen</p>
+
+        <div class="kitchen-grid">
+            <div class="kitchen-card">
+                <div class="kitchen-icon">
+                    <i class="fas fa-hand-holding-heart"></i>
+                </div>
+                <h3>Hygienic Preparation</h3>
+                <p>All staff wear gloves, hairnets, and follow strict hygiene protocols</p>
+            </div>
+            <div class="kitchen-card">
+                <div class="kitchen-icon">
+                    <i class="fas fa-temperature-high"></i>
+                </div>
+                <h3>Fresh Daily</h3>
+                <p>Food is prepared fresh every morning - no leftovers from previous day</p>
+            </div>
+            <div class="kitchen-card">
+                <div class="kitchen-icon">
+                    <i class="fas fa-leaf"></i>
+                </div>
+                <h3>Clean Ingredients</h3>
+                <p>Vegetables washed thrice, pure spices, no preservatives</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Our Staff -->
+    <section class="section" style="background: white;">
+        <h2 class="section-title">Meet Our Team</h2>
+        <p style="color: #636e72; margin-bottom: 30px;">The people behind your favorite meals</p>
+
+        <div class="staff-grid">
+            <div class="staff-card">
+                <div class="staff-img">
+                    <i class="fas fa-user-chef"></i>
+                </div>
+                <div class="staff-info">
+                    <h3>Chef Anand</h3>
+                    <p>Head Chef - 12 years experience</p>
+                </div>
+            </div>
+            <div class="staff-card">
+                <div class="staff-img">
+                    <i class="fas fa-user-tie"></i>
+                </div>
+                <div class="staff-info">
+                    <h3>Mrs. Lakshmi</h3>
+                    <p>South Indian Specialist</p>
+                </div>
+            </div>
+            <div class="staff-card">
+                <div class="staff-img">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="staff-info">
+                    <h3>Rajesh</h3>
+                    <p>Counter Manager</p>
+                </div>
+            </div>
+            <div class="staff-card">
+                <div class="staff-img">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="staff-info">
+                    <h3>Priya</h3>
+                    <p>Cleanliness Supervisor</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="testimonials">
+        <div class="testimonial-card">
+            <div class="testimonial-text">
+                "This Canteen has been our go-to place for 4 years. The food is always fresh, staff is friendly, and the new online ordering system is a game changer!"
+            </div>
+            <div class="testimonial-author">— Rahul Sharma, Computer Science (Final Year)</div>
+        </div>
+    </section>
+
+    <!-- Footer / Contact -->
+    <footer class="footer" id="contact">
+        <div class="footer-grid">
+            <div class="footer-col">
+                <h3>VP Canteen</h3>
+                <p>Vidyalankar Polytechnic</p>
+                <p>Wadala, Mumbai - 400037</p>
+                <p>📍 Near Library Building</p>
+            </div>
+            <div class="footer-col">
+                <h3>Timings</h3>
+                <p>Monday - Saturday: 11 AM - 6 PM</p>
+                <p>Sunday: Closed</p>
+                <p>☎️ +91 98765 43210</p>
+                <p>✉️ canteen@vp.edu</p>
+            </div>
+            <div class="footer-col">
+                <h3>Quick Links</h3>
+                <a href="#home">Home</a>
+                <a href="#about">About Us</a>
+                <a href="#" onclick="openLoginModal()">Order Online</a>
+                <a href="#events">Events</a>
+            </div>
+            <div class="footer-col">
+                <h3>Follow Us</h3>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-whatsapp"></i></a>
+                </div>
+                <p style="margin-top: 20px;">Subscribe for updates</p>
+                <input type="email" placeholder="Your email" style="padding: 10px; border-radius: 8px; border: none; width: 100%; margin-top: 10px;">
+            </div>
+        </div>
+        <div class="copyright">
+            © 2026  Canteen - Vidyalankar Polytechnic. All rights reserved.
+        </div>
+    </footer>
+
+    <!-- Login Modal -->
+    <div class="modal" id="loginModal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeLoginModal()">&times;</span>
+            <h2><i class="fas fa-utensils"></i>  Canteen Login</h2>
+            
+            <div class="role-selector">
+                <div class="role-option selected" id="role-student" onclick="selectRole('student')">
+                    <div>👨‍🎓 Student</div>
+                </div>
+                <div class="role-option" id="role-staff" onclick="selectRole('staff')">
+                    <div>👨‍🏫 Staff</div>
+                </div>
+                <div class="role-option" id="role-admin" onclick="selectRole('admin')">
+                    <div>⚙️ Admin</div>
+                </div>
+            </div>
+            
+            <input type="email" id="login-email" placeholder="College Email" required>
+            <input type="password" id="login-password" placeholder="Password" required>
+            
+            <div class="admin-note" id="admin-note" style="display: none;">
+                <i class="fas fa-info-circle"></i> Admin: admin@canteen.com / admin123
+            </div>
+            
+            <button onclick="handleLogin()">Login to Order →</button>
+            
+            <div class="switch-link">
+                Don't have an account? <a onclick="switchToRegister()">Register here</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div class="modal" id="registerModal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeRegisterModal()">&times;</span>
+            <h2><i class="fas fa-user-plus"></i> Join Canteen</h2>
+            <p style="text-align: center; color: #636e72; margin-bottom: 20px;">Register to start ordering your favorite meals</p>
+            
+            <input type="text" id="full-name" placeholder="Full Name" required>
+            <input type="text" id="roll-no" placeholder="College Roll Number" required>
+            <input type="email" id="register-email" placeholder="College Email" required>
+            <input type="password" id="register-password" placeholder="Create Password" required>
+            
+            <div class="role-selector">
+                <div class="role-option selected" id="register-role-student" onclick="selectRegisterRole('student')">
+                    <div>👨‍🎓 Student</div>
+                </div>
+                <div class="role-option" id="register-role-staff" onclick="selectRegisterRole('staff')">
+                    <div>👨‍🏫 Staff</div>
+                </div>
+            </div>
+            
+            <button onclick="handleRegister()">Register Now →</button>
+            
+            <div class="switch-link">
+                Already have an account? <a onclick="switchToLogin()">Login here</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State variables
+        let selectedRole = 'student';
+        let selectedRegisterRole = 'student';
+
+        // Login modal functions
         function selectRole(role) {
             selectedRole = role;
-            
-            // Update UI
             document.getElementById('role-student').classList.remove('selected');
             document.getElementById('role-staff').classList.remove('selected');
             document.getElementById('role-admin').classList.remove('selected');
-            
             document.getElementById(`role-${role}`).classList.add('selected');
             
             // Show/hide admin note
@@ -131,55 +943,99 @@
             } else {
                 adminNote.style.display = 'none';
             }
-            
-            // Update button text based on role
-            const loginBtn = document.getElementById('login-button');
-            if (role === 'admin') {
-                loginBtn.innerHTML = 'Access Dashboard 🔐';
-            } else if (role === 'staff') {
-                loginBtn.innerHTML = 'Staff Login 👨‍🏫';
-            } else {
-                loginBtn.innerHTML = "Let's Eat! 🚀";
-            }
         }
-        
-        // Handle form submission
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const role = selectedRole;
-            
-            // For admin role - redirect to admin panel
-            if (role === 'admin') {
-                // Simple admin check
+
+        function openLoginModal() {
+            document.getElementById('loginModal').style.display = 'flex';
+        }
+
+        function closeLoginModal() {
+            document.getElementById('loginModal').style.display = 'none';
+        }
+
+        function handleLogin() {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+
+            if (selectedRole === 'admin') {
                 if (email === 'admin@canteen.com' && password === 'admin123') {
                     sessionStorage.setItem('adminAuth', 'true');
-                    alert('Welcome Admin!');
                     window.location.href = 'admin.html';
                 } else {
-                    alert('Invalid admin credentials! Use: admin@canteen.com / admin123');
+                    alert('Invalid admin credentials');
                 }
                 return;
             }
-            
-            // For student/staff - regular login (mock for now)
+
             if (email && password) {
-                const userName = email.split('@')[0];
-                localStorage.setItem('studentName', userName);
-                localStorage.setItem('userEmail', email);
-                localStorage.setItem('userRole', role);
-                
-                alert(`Login successful! Welcome ${role}!`);
-                window.location.href = "menu.html";
+                localStorage.setItem('studentName', email.split('@')[0]);
+                localStorage.setItem('userRole', selectedRole);
+                localStorage.setItem('isLoggedIn', 'true');
+                window.location.href = 'menu.html';
             } else {
-                alert("Please enter email and password");
+                alert('Please enter email and password');
             }
-        });
+        }
+
+        // Register modal functions
+        function selectRegisterRole(role) {
+            selectedRegisterRole = role;
+            document.getElementById('register-role-student').classList.remove('selected');
+            document.getElementById('register-role-staff').classList.remove('selected');
+            document.getElementById(`register-role-${role}`).classList.add('selected');
+        }
+
+        function openRegisterModal() {
+            document.getElementById('registerModal').style.display = 'flex';
+        }
+
+        function closeRegisterModal() {
+            document.getElementById('registerModal').style.display = 'none';
+        }
+
+        function handleRegister() {
+            const fullName = document.getElementById('full-name').value;
+            const rollNo = document.getElementById('roll-no').value;
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+
+            if (!fullName || !rollNo || !email || !password) {
+                alert('Please fill in all fields');
+                return;
+            }
+
+            // Here you would typically send this to your backend
+            // For now, we'll just simulate successful registration
+            alert(`Registration successful! Welcome ${fullName}!`);
+            
+            // Close register modal and open login modal
+            closeRegisterModal();
+            openLoginModal();
+        }
+
+        // Switch between modals
+        function switchToRegister() {
+            closeLoginModal();
+            openRegisterModal();
+        }
+
+        function switchToLogin() {
+            closeRegisterModal();
+            openLoginModal();
+        }
+
+        // Close modals when clicking outside
+        window.onclick = function(event) {
+            const loginModal = document.getElementById('loginModal');
+            const registerModal = document.getElementById('registerModal');
+            
+            if (event.target === loginModal) {
+                loginModal.style.display = 'none';
+            }
+            if (event.target === registerModal) {
+                registerModal.style.display = 'none';
+            }
+        }
     </script>
-    
-    <!-- Font Awesome for icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </body>
 </html>

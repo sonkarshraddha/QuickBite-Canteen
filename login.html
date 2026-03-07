@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuickBite | Login</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Additional styles for role selector */
+        .role-selector {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        
+        .role-option {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #eee;
+            border-radius: 12px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s;
+            background: white;
+        }
+        
+        .role-option:hover {
+            border-color: #ff7675;
+            transform: translateY(-2px);
+        }
+        
+        .role-option.selected {
+            border-color: #d63031;
+            background: #fff5f5;
+            box-shadow: 0 4px 10px rgba(214, 48, 49, 0.1);
+        }
+        
+        .role-option i {
+            font-size: 24px;
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        .role-option span {
+            font-size: 14px;
+            font-weight: bold;
+        }
+        
+        .role-option small {
+            font-size: 11px;
+            color: #7f8c8d;
+            display: block;
+        }
+        
+        .admin-note {
+            background: #f1f3f4;
+            border-radius: 8px;
+            padding: 8px;
+            margin: 10px 0;
+            font-size: 12px;
+            color: #636e72;
+        }
+        
+        .admin-note i {
+            color: #d63031;
+        }
+    </style>
+</head>
+<body>
+    <div class="full-screen-bg">
+        <div class="login-popup">
+            <form id="loginForm">
+                <div style="font-size: 40px;">🍱</div>
+                <h2 style="color: #ff4757;">QuickBite Login</h2>
+                <p>Log in with your college ID</p>
+                
+                <!-- Role Selection -->
+                <div class="role-selector">
+                    <div class="role-option selected" id="role-student" onclick="selectRole('student')">
+                        <i>👨‍🎓</i>
+                        <span>Student</span>
+                        <small>Meal orders</small>
+                    </div>
+                    <div class="role-option" id="role-staff" onclick="selectRole('staff')">
+                        <i>👨‍🏫</i>
+                        <span>Staff</span>
+                        <small>Faculty meals</small>
+                    </div>
+                    <div class="role-option" id="role-admin" onclick="selectRole('admin')">
+                        <i>⚙️</i>
+                        <span>Admin</span>
+                        <small>Management</small>
+                    </div>
+                </div>
+                
+                <!-- Admin Note (hidden by default) -->
+                <div class="admin-note" id="admin-note" style="display: none;">
+                    <i class="fas fa-info-circle"></i> Admin: Use admin@canteen.com / admin123
+                </div>
+                
+                <input type="email" id="email" placeholder="College Email" required>
+                <input type="password" id="password" placeholder="Password" required>
+                
+                <button type="submit" id="login-button">Let's Eat! 🚀</button>
+                <p style="margin-top: 15px; font-size: 14px;">
+                    Don't have an account? <a href="register.html">Register here</a>
+                </p>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        // Role selection state
+        let selectedRole = 'student'; // Default role
+        
+        function selectRole(role) {
+            selectedRole = role;
+            
+            // Update UI
+            document.getElementById('role-student').classList.remove('selected');
+            document.getElementById('role-staff').classList.remove('selected');
+            document.getElementById('role-admin').classList.remove('selected');
+            
+            document.getElementById(`role-${role}`).classList.add('selected');
+            
+            // Show/hide admin note
+            const adminNote = document.getElementById('admin-note');
+            if (role === 'admin') {
+                adminNote.style.display = 'block';
+            } else {
+                adminNote.style.display = 'none';
+            }
+            
+            // Update button text based on role
+            const loginBtn = document.getElementById('login-button');
+            if (role === 'admin') {
+                loginBtn.innerHTML = 'Access Dashboard 🔐';
+            } else if (role === 'staff') {
+                loginBtn.innerHTML = 'Staff Login 👨‍🏫';
+            } else {
+                loginBtn.innerHTML = "Let's Eat! 🚀";
+            }
+        }
+        
+        // Handle form submission
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const role = selectedRole;
+            
+            // For admin role - redirect to admin panel
+            if (role === 'admin') {
+                // Simple admin check
+                if (email === 'admin@canteen.com' && password === 'admin123') {
+                    sessionStorage.setItem('adminAuth', 'true');
+                    alert('Welcome Admin!');
+                    window.location.href = 'admin.html';
+                } else {
+                    alert('Invalid admin credentials! Use: admin@canteen.com / admin123');
+                }
+                return;
+            }
+            
+            // For student/staff - regular login (mock for now)
+            if (email && password) {
+                const userName = email.split('@')[0];
+                localStorage.setItem('studentName', userName);
+                localStorage.setItem('userEmail', email);
+                localStorage.setItem('userRole', role);
+                
+                alert(`Login successful! Welcome ${role}!`);
+                window.location.href = "menu.html";
+            } else {
+                alert("Please enter email and password");
+            }
+        });
+    </script>
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</body>
+</html>
