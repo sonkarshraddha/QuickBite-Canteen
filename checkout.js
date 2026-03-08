@@ -4,6 +4,9 @@ let cartItems = [];
 let orderTotal = 0;
 let subtotal = 0;
 
+// Backend URL - Add this at the top
+const BACKEND_URL = 'https://quickbite-backend-z577.onrender.com';
+
 // Load order data when page loads
 document.addEventListener('DOMContentLoaded', function() {
     loadCartData();
@@ -255,25 +258,60 @@ function confirmOrder() {
         orderId: orderId
     };
     
-    // Save order to allOrders (for admin)
-    saveOrder(orderData);
-    
-    // Handle payment based on method
-    if (selectedMethod === 'online') {
-        // Open UPI apps
-        openUPIApps(finalAmount.toFixed(2), orderId);
+    // Save order to backend - THIS IS WHERE THE FETCH GOES
+    fetch(`${BACKEND_URL}/place-order`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(orderData)
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Failed to place order');
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Order saved to backend:', data);
         
-        // Show success message after payment (simulated)
-        setTimeout(() => {
+        // Also save to localStorage as backup
+        saveOrder(orderData);
+        
+        // Handle payment based on method
+        if (selectedMethod === 'online') {
+            // Open UPI apps
+            openUPIApps(finalAmount.toFixed(2), orderId);
+            
+            // Show success message after payment (simulated)
+            setTimeout(() => {
+                showSuccessMessage(orderData);
+            }, 5000);
+        } else {
+            // Counter payment - direct success
             showSuccessMessage(orderData);
-        }, 5000);
-    } else {
-        // Counter payment - direct success
-        showSuccessMessage(orderData);
-    }
+        }
+    })
+    .catch(error => {
+        console.error('Error placing order:', error);
+        alert('Failed to connect to server. Order saved locally.');
+        
+        // Save locally as backup
+        saveOrder(orderData);
+        
+        // Still proceed with payment
+        if (selectedMethod === 'online') {
+            openUPIApps(finalAmount.toFixed(2), orderId);
+            setTimeout(() => {
+                showSuccessMessage(orderData);
+            }, 5000);
+        } else {
+            showSuccessMessage(orderData);
+        }
+    });
 }
 
-// Save order to allOrders
+// Save order to localStorage (backup)
 function saveOrder(order) {
     // Get existing orders
     let allOrders = JSON.parse(localStorage.getItem('allOrders')) || [];
@@ -289,7 +327,7 @@ function saveOrder(order) {
     previousOrders.push(order);
     localStorage.setItem('previousOrders', JSON.stringify(previousOrders));
     
-    console.log('Order saved:', order);
+    console.log('Order saved locally:', order);
 }
 
 // Show success message and redirect
