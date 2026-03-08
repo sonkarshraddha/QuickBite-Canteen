@@ -5,6 +5,41 @@ const BASE_URL = "https://quickbite-canteen.onrender.com";
 let cart = [];
 let itemCounts = {};
 
+// Display user info from localStorage
+function displayUserInfo() {
+    const studentName = localStorage.getItem('studentName');
+    const userRole = localStorage.getItem('userRole');
+    
+    const greetingElement = document.getElementById('user-greeting');
+    const roleElement = document.getElementById('user-role');
+    const avatarElement = document.getElementById('user-avatar');
+    
+    if (studentName && greetingElement) {
+        greetingElement.innerHTML = `Hello, ${studentName}!`;
+    }
+    
+    if (userRole && roleElement) {
+        let roleText = '';
+        if (userRole === 'student') roleText = 'Student';
+        else if (userRole === 'staff') roleText = 'Staff';
+        else roleText = 'User';
+        
+        roleElement.innerHTML = roleText;
+        
+        // Change avatar based on role
+        if (avatarElement) {
+            if (userRole === 'student') avatarElement.innerHTML = '👨‍🎓';
+            else if (userRole === 'staff') avatarElement.innerHTML = '👨‍🏫';
+        }
+    }
+}
+
+// Call this function when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    displayUserInfo();
+    // ... your existing code ...
+});
+
 // Load menu on page load
 document.addEventListener('DOMContentLoaded', function() {
     updateCartDisplay();

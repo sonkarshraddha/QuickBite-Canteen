@@ -1041,5 +1041,30 @@
             }
         }
     </script>
+    <script>
+    // Display user info from localStorage
+    document.addEventListener('DOMContentLoaded', function() {
+        const studentName = localStorage.getItem('studentName');
+        const userRole = localStorage.getItem('userRole');
+        
+        if (studentName) {
+            document.getElementById('user-greeting').innerHTML = `Hello, ${studentName}!`;
+        }
+        
+        if (userRole) {
+            let roleText = '';
+            if (userRole === 'student') roleText = 'Student';
+            else if (userRole === 'staff') roleText = 'Staff';
+            else roleText = 'User';
+            
+            document.getElementById('user-role').innerHTML = roleText;
+            
+            // Change avatar based on role
+            const avatar = document.getElementById('user-avatar');
+            if (userRole === 'student') avatar.innerHTML = '👨‍🎓';
+            else if (userRole === 'staff') avatar.innerHTML = '👨‍🏫';
+        }
+    });
+</script>
 </body>
 </html>
