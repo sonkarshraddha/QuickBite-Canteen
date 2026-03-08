@@ -954,10 +954,55 @@
         }
 
         // CORRECTED HANDLE LOGIN FUNCTION
-        function handleLogin() {
-            const email = document.getElementById('login-email').value;
-            const password = document.getElementById('login-password').value;
-            const role = selectedRole;
+       function handleLogin() {
+    const email = document.getElementById('login-email').value;
+    const password = document.getElementById('login-password').value;
+    const role = selectedRole;
+
+    // For admin role - special handling
+    if (role === 'admin') {
+        if (email === 'admin@canteen.com' && password === 'admin123') {
+            sessionStorage.setItem('adminAuth', 'true');
+            sessionStorage.setItem('userRole', 'admin');
+            sessionStorage.setItem('userName', 'Admin');
+            window.location.href = 'admin.html';
+        } else {
+            alert('Invalid admin credentials! Use: admin@canteen.com / admin123');
+        }
+        return;
+    }
+
+    // For student/staff - connect to backend
+    fetch('https://quickbite-backend-z577.onrender.com/login', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password })
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(err => { 
+                throw new Error(err.message); 
+            });
+        }
+        return response.json();
+    })
+    .then(data => {
+        // Store user info
+        localStorage.setItem('studentName', data.user.fullName);
+        localStorage.setItem('userEmail', data.user.email);
+        localStorage.setItem('userRole', role);
+        localStorage.setItem('isLoggedIn', 'true');
+        
+        alert(`Login successful! Welcome ${data.user.fullName}!`);
+        window.location.href = 'menu.html';
+    })
+    .catch(error => {
+        alert('Login failed: ' + error.message);
+        console.error('Login error:', error);
+    });
+
 
             // For admin role - special handling
             if (role === 'admin') {
