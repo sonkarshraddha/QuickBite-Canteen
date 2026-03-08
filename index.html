@@ -667,17 +667,15 @@
             <img src="college-logo.jpeg" alt="VP Logo" class="college-logo-img" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'50\' height=\'50\' viewBox=\'0 0 100 100\'%3E%3Crect width=\'100\' height=\'100\' fill=\'%23d63031\'/%3E%3Ctext x=\'20\' y=\'65\' fill=\'white\' font-size=\'40\' font-weight=\'bold\'%3EVP%3C/text%3E%3C/svg%3E'">
             <div class="canteen-name">Canteen</div>
         </div>
-       <div class="nav-links">
-    <a href="#home">Home</a>
-    <a href="#about">About</a>
-    <a href="#" onclick="openLoginModal()">Menu</a>
-    <a href="#events">Events</a>
-    <a href="#contact">Contact</a>
-    <div class="user-icon" onclick="openLoginModal()">
-        <i class="fas fa-user"></i>
-    </div>
-</div>
-</div>
+        <div class="nav-links">
+            <a href="#home">Home</a>
+            <a href="#about">About</a>
+            <a href="#" onclick="openLoginModal()">Menu</a>
+            <a href="#events">Events</a>
+            <a href="#contact">Contact</a>
+            <div class="user-icon" onclick="openLoginModal()">
+                <i class="fas fa-user"></i>
+            </div>
         </div>
     </div>
 
@@ -769,50 +767,49 @@
     </section>
 
     <!-- Our Staff -->
-    <!-- Our Staff -->
-<section class="section" style="background: white;">
-    <h2 class="section-title">Meet Our Team</h2>
-    <p style="color: #636e72; margin-bottom: 30px;">The people behind your favorite meals</p>
+    <section class="section" style="background: white;">
+        <h2 class="section-title">Meet Our Team</h2>
+        <p style="color: #636e72; margin-bottom: 30px;">The people behind your favorite meals</p>
 
-    <div class="staff-grid">
-        <div class="staff-card">
-            <div class="staff-img">
-                <i class="fas fa-user-tie"></i>
+        <div class="staff-grid">
+            <div class="staff-card">
+                <div class="staff-img">
+                    <i class="fas fa-user-tie"></i>
+                </div>
+                <div class="staff-info">
+                    <h3>Chef Anand</h3>
+                    <p>Head Chef - 12 years experience</p>
+                </div>
             </div>
-            <div class="staff-info">
-                <h3>Chef Anand</h3>
-                <p>Head Chef - 12 years experience</p>
+            <div class="staff-card">
+                <div class="staff-img">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="staff-info">
+                    <h3>Mrs. Lakshmi</h3>
+                    <p>South Indian Specialist</p>
+                </div>
+            </div>
+            <div class="staff-card">
+                <div class="staff-img">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="staff-info">
+                    <h3>Rajesh</h3>
+                    <p>Counter Manager</p>
+                </div>
+            </div>
+            <div class="staff-card">
+                <div class="staff-img">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="staff-info">
+                    <h3>Priya</h3>
+                    <p>Cleanliness Supervisor</p>
+                </div>
             </div>
         </div>
-        <div class="staff-card">
-            <div class="staff-img">
-                <i class="fas fa-user"></i>
-            </div>
-            <div class="staff-info">
-                <h3>Mrs. Lakshmi</h3>
-                <p>South Indian Specialist</p>
-            </div>
-        </div>
-        <div class="staff-card">
-            <div class="staff-img">
-                <i class="fas fa-user"></i>
-            </div>
-            <div class="staff-info">
-                <h3>Rajesh</h3>
-                <p>Counter Manager</p>
-            </div>
-        </div>
-        <div class="staff-card">
-            <div class="staff-img">
-                <i class="fas fa-user"></i>
-            </div>
-            <div class="staff-info">
-                <h3>Priya</h3>
-                <p>Cleanliness Supervisor</p>
-            </div>
-        </div>
-    </div>
-</section>
+    </section>
 
     <!-- Testimonials -->
     <section class="testimonials">
@@ -820,7 +817,7 @@
             <div class="testimonial-text">
                 "This Canteen has been our go-to place for 4 years. The food is always fresh, staff is friendly, and the new online ordering system is a game changer!"
             </div>
-            <div class="testimonial-author">— Shraddha Sonkar, Amruta Rachha, Sanika Junghare, Komal Bhapkar  <br> | Information Technology. (Final Year)</div>
+            <div class="testimonial-author">— Shraddha Sonkar, Amruta Rachha, Sanika Junghare, Komal Bhapkar <br> | Information Technology (Final Year)</div>
         </div>
     </section>
 
@@ -860,7 +857,7 @@
             </div>
         </div>
         <div class="copyright">
-            © 2026  Canteen - Canteen ordering System.. All rights reserved.
+            © 2026 Canteen - Canteen ordering System. All rights reserved.
         </div>
     </footer>
 
@@ -868,7 +865,7 @@
     <div class="modal" id="loginModal">
         <div class="modal-content">
             <span class="modal-close" onclick="closeLoginModal()">&times;</span>
-            <h2><i class="fas fa-utensils"></i>  Canteen Login</h2>
+            <h2><i class="fas fa-utensils"></i> Canteen Login</h2>
             
             <div class="role-selector">
                 <div class="role-option selected" id="role-student" onclick="selectRole('student')">
@@ -939,7 +936,6 @@
             document.getElementById('role-admin').classList.remove('selected');
             document.getElementById(`role-${role}`).classList.add('selected');
             
-            
             // Show/hide admin note
             const adminNote = document.getElementById('admin-note');
             if (role === 'admin') {
@@ -957,28 +953,53 @@
             document.getElementById('loginModal').style.display = 'none';
         }
 
+        // CORRECTED HANDLE LOGIN FUNCTION
         function handleLogin() {
             const email = document.getElementById('login-email').value;
             const password = document.getElementById('login-password').value;
+            const role = selectedRole;
 
-            if (selectedRole === 'admin') {
+            // For admin role - special handling
+            if (role === 'admin') {
                 if (email === 'admin@canteen.com' && password === 'admin123') {
                     sessionStorage.setItem('adminAuth', 'true');
+                    sessionStorage.setItem('userRole', 'admin');
+                    sessionStorage.setItem('userName', 'Admin');
                     window.location.href = 'admin.html';
                 } else {
-                    alert('Invalid admin credentials');
+                    alert('Invalid admin credentials! Use: admin@canteen.com / admin123');
                 }
                 return;
             }
 
-            if (email && password) {
-                localStorage.setItem('studentName', email.split('@')[0]);
-                localStorage.setItem('userRole', selectedRole);
+            // For student/staff - connect to backend
+            fetch('http://localhost:3000/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email, password })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => { throw new Error(err.message); });
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Store user info
+                localStorage.setItem('studentName', data.user.fullName);
+                localStorage.setItem('userEmail', data.user.email);
+                localStorage.setItem('userRole', role);
                 localStorage.setItem('isLoggedIn', 'true');
+                
+                alert(`Login successful! Welcome ${data.user.fullName}!`);
                 window.location.href = 'menu.html';
-            } else {
-                alert('Please enter email and password');
-            }
+            })
+            .catch(error => {
+                alert('Login failed: ' + error.message);
+                console.error('Login error:', error);
+            });
         }
 
         // Register modal functions
@@ -997,6 +1018,7 @@
             document.getElementById('registerModal').style.display = 'none';
         }
 
+        // CORRECTED HANDLE REGISTER FUNCTION
         function handleRegister() {
             const fullName = document.getElementById('full-name').value;
             const rollNo = document.getElementById('roll-no').value;
@@ -1008,13 +1030,34 @@
                 return;
             }
 
-            // Here you would typically send this to your backend
-            // For now, we'll just simulate successful registration
-            alert(`Registration successful! Welcome ${fullName}!`);
-            
-            // Close register modal and open login modal
-            closeRegisterModal();
-            openLoginModal();
+            // Send registration data to backend
+            fetch('http://localhost:3000/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ 
+                    fullName, 
+                    rollNo, 
+                    email, 
+                    password 
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => { throw new Error(err.message); });
+                }
+                return response.json();
+            })
+            .then(data => {
+                alert(`Registration successful! Welcome ${fullName}!`);
+                closeRegisterModal();
+                openLoginModal();
+            })
+            .catch(error => {
+                alert('Registration failed: ' + error.message);
+                console.error('Registration error:', error);
+            });
         }
 
         // Switch between modals
@@ -1041,30 +1084,5 @@
             }
         }
     </script>
-    <script>
-    // Display user info from localStorage
-    document.addEventListener('DOMContentLoaded', function() {
-        const studentName = localStorage.getItem('studentName');
-        const userRole = localStorage.getItem('userRole');
-        
-        if (studentName) {
-            document.getElementById('user-greeting').innerHTML = `Hello, ${studentName}!`;
-        }
-        
-        if (userRole) {
-            let roleText = '';
-            if (userRole === 'student') roleText = 'Student';
-            else if (userRole === 'staff') roleText = 'Staff';
-            else roleText = 'User';
-            
-            document.getElementById('user-role').innerHTML = roleText;
-            
-            // Change avatar based on role
-            const avatar = document.getElementById('user-avatar');
-            if (userRole === 'student') avatar.innerHTML = '👨‍🎓';
-            else if (userRole === 'staff') avatar.innerHTML = '👨‍🏫';
-        }
-    });
-</script>
 </body>
 </html>
