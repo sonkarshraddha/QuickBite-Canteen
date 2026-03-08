@@ -3,43 +3,15 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 
 const app = express();
-const PORT = 3000; // THIS WAS MISSING!
+const PORT = 3000;
 
-// 1. Middlewares
-app.use(cors());
-app.use(express.json());
-// 1. Middlewares
+// Middlewares
 app.use(cors());
 app.use(express.json());
 
-// ===== ADD THESE TEST ROUTES HERE =====
+// ========== SIMPLE TEST ROUTES ==========
 app.get('/', (req, res) => {
     res.send('🚀 QuickBite Backend is running!');
-});
-
-// DEBUG ROUTE - Check if user exists (TEMPORARY)
-app.post('/debug-user', async (req, res) => {
-    try {
-        const { email } = req.body;
-        const user = await User.findOne({ email });
-        
-        if (user) {
-            res.json({
-                exists: true,
-                email: user.email,
-                fullName: user.fullName,
-                storedPassword: user.password, // This will show us what's saved
-                message: 'User found in database'
-            });
-        } else {
-            res.json({
-                exists: false,
-                message: 'User not found in database'
-            });
-        }
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
 });
 
 app.get('/test', (req, res) => {
@@ -49,18 +21,9 @@ app.get('/test', (req, res) => {
         time: new Date().toLocaleString()
     });
 });
-// ======================================
+// ========================================
 
-// 2. MongoDB Connection
-mongoose.connect('mongodb+srv://shraddhasonkar0000_db_user:fYsxlRU2IG8sQzOy@cluster1.nifjyyc.mongodb.net/Quickbite?retryWrites=true&w=majority&appName=Cluster1', {
-    serverSelectionTimeoutMS: 30000,
-    socketTimeoutMS: 45000,
-    connectTimeoutMS: 30000
-})
-.then(() => console.log('✅ Connected to MongoDB!'))
-.catch(err => console.error('❌ MongoDB Connection Error:', err));
-
-// 2. MongoDB Connection - Cloud Atlas
+// MongoDB Connection
 const MONGODB_URI = 'mongodb+srv://shraddhasonkar0000_db_user:fYsxlRU2IG8sQzOy@cluster1.nifjyyc.mongodb.net/Quickbite?retryWrites=true&w=majority&appName=Cluster1';
 
 mongoose.connect(MONGODB_URI, {
@@ -71,16 +34,16 @@ mongoose.connect(MONGODB_URI, {
 .then(() => console.log('✅ Connected to MongoDB Atlas!'))
 .catch(err => console.error('❌ MongoDB Connection Error:', err));
 
-// 3a. User Schema
+// User Schema
 const userSchema = new mongoose.Schema({
     fullName: { type: String, required: true },
-    rollNo:   { type: String, required: true },
-    email:    { type: String, required: true, unique: true },
+    rollNo: { type: String, required: true },
+    email: { type: String, required: true, unique: true },
     password: { type: String, required: true }
 });
 const User = mongoose.model('User', userSchema);
 
-// 3b. Order Schema
+// Order Schema
 const orderSchema = new mongoose.Schema({
     customerName: String,
     email: String,
@@ -92,65 +55,119 @@ const orderSchema = new mongoose.Schema({
 });
 const Order = mongoose.model('Order', orderSchema);
 
-// 4a. Registration Route
+// ========== REGISTER ROUTE ==========
 app.post('/register', async (req, res) => {
+    console.log('📝 Register attempt:', req.body);
+    
     try {
         const { fullName, rollNo, email, password } = req.body;
+        
+        // Check if user exists
         const existingUser = await User.findOne({ email });
-        if (existingUser) return res.status(400).json({ message: "Email already registered!" });
+        if (existingUser) {
+            console.log('❌ User already exists:', email);
+            return res.status(400).json({ message: "Email already registered!" });
+        }
 
+        // Create new user
         const newUser = new User({ fullName, rollNo, email, password });
         await newUser.save();
+        
+        console.log('✅ User registered:', email);
         res.status(201).json({ message: "Registration successful!" });
+        
     } catch (error) {
+        console.error('❌ Registration error:', error);
         res.status(500).json({ message: "Error: " + error.message });
     }
 });
 
-// 4b. Login Route
-// Login Route
+// ========== LOGIN ROUTE (FIXED) ==========
 app.post('/login', async (req, res) => {
+    console.log('🔐 Login attempt:', req.body);
+    
     try {
         const { email, password } = req.body;
-        console.log('Login attempt:', { email, password }); // Add logging
         
+        // Find user by email
         const user = await User.findOne({ email });
-        console.log('User found:', user ? 'Yes' : 'No');
         
         if (!user) {
-            return res.status(401).json({ message: "User not found!" });
+            console.log('❌ User not found:', email);
+            return res.status(401).json({ message: "Invalid email or password!" });
         }
         
+        console.log('✅ User found:', user.email);
         console.log('Stored password:', user.password);
         console.log('Provided password:', password);
         
+        // Check password
         if (user.password !== password) {
-            return res.status(401).json({ message: "Invalid password!" });
+            console.log('❌ Password mismatch');
+            return res.status(401).json({ message: "Invalid email or password!" });
         }
         
+        console.log('✅ Login successful for:', email);
         res.status(200).json({ 
             message: "Login successful!", 
-            user: { fullName: user.fullName, email: user.email } 
+            user: { 
+                fullName: user.fullName, 
+                email: user.email 
+            } 
         });
+        
     } catch (error) {
-        console.error('Login error:', error);
+        console.error('❌ Login error:', error);
         res.status(500).json({ message: "Server error during login." });
     }
 });
 
-// 4c. Place Order Route
+// ========== DEBUG ROUTE - Check user ==========
+app.post('/debug-user', async (req, res) => {
+    try {
+        const { email } = req.body;
+        const user = await User.findOne({ email });
+        
+        if (user) {
+            res.json({
+                exists: true,
+                email: user.email,
+                fullName: user.fullName,
+                storedPassword: user.password,
+                message: 'User found'
+            });
+        } else {
+            res.json({
+                exists: false,
+                message: 'User not found'
+            });
+        }
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// ========== GET ALL USERS (for testing) ==========
+app.get('/users', async (req, res) => {
+    try {
+        const users = await User.find({}, 'email fullName');
+        res.json(users);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+// Order Routes
 app.post('/place-order', async (req, res) => {
     try {
         const newOrder = new Order(req.body);
         await newOrder.save();
-        res.status(201).json({ message: "Order placed successfully! Admin is notified." });
+        res.status(201).json({ message: "Order placed successfully!" });
     } catch (error) {
         console.error("Order Save Error:", error);
-        res.status(500).json({ message: "Failed to send order to admin." });
+        res.status(500).json({ message: "Failed to send order." });
     }
 });
 
-// 4d. Get Orders Route
 app.get('/get-orders', async (req, res) => {
     try {
         const orders = await Order.find().sort({ orderDate: -1 });
@@ -160,8 +177,9 @@ app.get('/get-orders', async (req, res) => {
     }
 });
 
-// 5. Start Server - FIXED VERSION
+// Start Server
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Server running on http://192.168.0.100:${PORT}`);
     console.log(`📱 Access from mobile: http://192.168.0.100:${PORT}`);
+    console.log(`🌐 Public URL: https://quickbite-backend-z577.onrender.com`);
 });
