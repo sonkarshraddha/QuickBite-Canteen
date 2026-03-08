@@ -5,7 +5,7 @@ let orderTotal = 0;
 let subtotal = 0;
 
 // Backend URL - Add this at the top
-const BACKEND_URL = 'https://quickbite-backend-z577.onrender.com';
+const BACKEND_URL = 'https://quickbite-backend-z57f.onrender.com';
 
 // Load order data when page loads
 document.addEventListener('DOMContentLoaded', function() {
