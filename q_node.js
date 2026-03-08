@@ -89,7 +89,7 @@ app.get('/get-orders', async (req, res) => {
 });
 
 // 5. Start Server
-const PORT = 3000;
-app.listen(PORT, () => {
-    console.log(`🚀 Server running on http://localhost:${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`🚀 Server running on http://192.168.0.100:${PORT}`);
+    console.log(`📱 Access from mobile: http://192.168.0.100:${PORT}`);
 });
