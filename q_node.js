@@ -9,10 +9,16 @@ const PORT = 3000; // THIS WAS MISSING!
 app.use(cors());
 app.use(express.json());
 
-// 2. MongoDB Connection
-mongoose.connect('mongodb://127.0.0.1:27017/Quickbite')
-    .then(() => console.log('✅ Connected to MongoDB!'))
-    .catch(err => console.error('❌ MongoDB Connection Error:', err));
+// 2. MongoDB Connection - Cloud Atlas
+const MONGODB_URI = 'mongodb+srv://shraddhasonkar0000_db_user:fYsxlRU2IG8sQzOy@cluster1.nifjyyc.mongodb.net/Quickbite?retryWrites=true&w=majority&appName=Cluster1';
+
+mongoose.connect(MONGODB_URI, {
+    serverSelectionTimeoutMS: 30000,
+    socketTimeoutMS: 45000,
+    connectTimeoutMS: 30000
+})
+.then(() => console.log('✅ Connected to MongoDB Atlas!'))
+.catch(err => console.error('❌ MongoDB Connection Error:', err));
 
 // 3a. User Schema
 const userSchema = new mongoose.Schema({
