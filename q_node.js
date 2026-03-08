@@ -8,6 +8,29 @@ const PORT = 3000; // THIS WAS MISSING!
 // 1. Middlewares
 app.use(cors());
 app.use(express.json());
+// Test route to check server status
+app.get('/', (req, res) => {
+    res.send('🚀 QuickBite Backend is running!');
+});
+
+// Test route to check MongoDB connection
+app.get('/test', async (req, res) => {
+    try {
+        // Try to count users in database
+        const count = await User.countDocuments();
+        res.json({ 
+            status: 'success', 
+            message: 'MongoDB connected!',
+            userCount: count 
+        });
+    } catch (error) {
+        res.json({ 
+            status: 'error', 
+            message: 'MongoDB connection failed',
+            error: error.message 
+        });
+    }
+});
 
 // 2. MongoDB Connection - Cloud Atlas
 const MONGODB_URI = 'mongodb+srv://shraddhasonkar0000_db_user:fYsxlRU2IG8sQzOy@cluster1.nifjyyc.mongodb.net/Quickbite?retryWrites=true&w=majority&appName=Cluster1';
