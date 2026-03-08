@@ -83,6 +83,7 @@ app.post('/register', async (req, res) => {
 });
 
 // ========== LOGIN ROUTE (FIXED) ==========
+// ========== LOGIN ROUTE (FIXED) ==========
 app.post('/login', async (req, res) => {
     console.log('🔐 Login attempt:', req.body);
     
@@ -92,21 +93,21 @@ app.post('/login', async (req, res) => {
         // Find user by email
         const user = await User.findOne({ email });
         
+        // If user doesn't exist
         if (!user) {
             console.log('❌ User not found:', email);
             return res.status(401).json({ message: "Invalid email or password!" });
         }
         
-        console.log('✅ User found:', user.email);
-        console.log('Stored password:', user.password);
-        console.log('Provided password:', password);
-        
         // Check password
         if (user.password !== password) {
-            console.log('❌ Password mismatch');
+            console.log('❌ Wrong password for:', email);
+            console.log('Stored:', user.password);
+            console.log('Provided:', password);
             return res.status(401).json({ message: "Invalid email or password!" });
         }
         
+        // Success!
         console.log('✅ Login successful for:', email);
         res.status(200).json({ 
             message: "Login successful!", 
