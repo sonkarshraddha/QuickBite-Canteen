@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 
 const app = express();
+const PORT = 3000; // THIS WAS MISSING!
 
 // 1. Middlewares
 app.use(cors());
@@ -22,19 +23,19 @@ const userSchema = new mongoose.Schema({
 });
 const User = mongoose.model('User', userSchema);
 
-// 3b. THE BRIDGE: Order Schema (Stores student orders for the admin)
+// 3b. Order Schema
 const orderSchema = new mongoose.Schema({
     customerName: String,
     email: String,
-    items: Array,        // Stores the list of food items
+    items: Array,
     totalAmount: Number,
     tableNumber: String,
-    status: { type: String, default: 'Pending' }, // Admin can change this to 'Completed'
+    status: { type: String, default: 'Pending' },
     orderDate: { type: Date, default: Date.now }
 });
 const Order = mongoose.model('Order', orderSchema);
 
-// 4a. Registration & Login Routes
+// 4a. Registration Route
 app.post('/register', async (req, res) => {
     try {
         const { fullName, rollNo, email, password } = req.body;
@@ -49,6 +50,7 @@ app.post('/register', async (req, res) => {
     }
 });
 
+// 4b. Login Route
 app.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -65,8 +67,7 @@ app.post('/login', async (req, res) => {
     }
 });
 
-// 4b. THE BRIDGE: Order Routes
-// STUDENT SIDE: Sends order data to the database
+// 4c. Place Order Route
 app.post('/place-order', async (req, res) => {
     try {
         const newOrder = new Order(req.body);
@@ -78,17 +79,17 @@ app.post('/place-order', async (req, res) => {
     }
 });
 
-// ADMIN SIDE: Gets all orders from the database to display in the admin panel
+// 4d. Get Orders Route
 app.get('/get-orders', async (req, res) => {
     try {
-        const orders = await Order.find().sort({ orderDate: -1 }); // Newest orders first
+        const orders = await Order.find().sort({ orderDate: -1 });
         res.status(200).json(orders);
     } catch (error) {
         res.status(500).json({ message: "Could not fetch orders." });
     }
 });
 
-// 5. Start Server
+// 5. Start Server - FIXED VERSION
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Server running on http://192.168.0.100:${PORT}`);
     console.log(`📱 Access from mobile: http://192.168.0.100:${PORT}`);
