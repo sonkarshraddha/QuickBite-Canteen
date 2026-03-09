@@ -82,18 +82,22 @@ app.post('/register', async (req, res) => {
     }
 });
 
-// ========== LOGIN ROUTE (FIXED) ==========
-// ========== LOGIN ROUTE (FIXED) ==========
+// ========== LOGIN ROUTE (COMPLETELY FIXED) ==========
 app.post('/login', async (req, res) => {
-    console.log('🔐 Login attempt:', req.body);
+    console.log('🔐 Login attempt:', { email: req.body.email });
     
     try {
         const { email, password } = req.body;
         
-        // Find user by email
+        // Validate input
+        if (!email || !password) {
+            return res.status(400).json({ message: "Email and password required" });
+        }
+        
+        // ONLY find user - DO NOT try to create or validate a new user
         const user = await User.findOne({ email });
         
-        // If user doesn't exist
+        // Check if user exists
         if (!user) {
             console.log('❌ User not found:', email);
             return res.status(401).json({ message: "Invalid email or password!" });
@@ -102,8 +106,6 @@ app.post('/login', async (req, res) => {
         // Check password
         if (user.password !== password) {
             console.log('❌ Wrong password for:', email);
-            console.log('Stored:', user.password);
-            console.log('Provided:', password);
             return res.status(401).json({ message: "Invalid email or password!" });
         }
         
