@@ -4,7 +4,7 @@ let cartItems = [];
 let orderTotal = 0;
 let subtotal = 0;
 
-// Backend URL - Add this at the top
+// Backend URL
 const BACKEND_URL = 'https://quickbite-backend-z57f.onrender.com';
 
 // Load order data when page loads
@@ -169,54 +169,75 @@ function openUPIApps(amount, orderId) {
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     
     if (isMobile) {
-        // Method 1: Try intent format (works on most devices)
-        const intentUrl = `intent://pay?pa=canteen@vp.college&pn=QuickBite&am=${amount}&cu=INR&tn=Order%20${orderId}#Intent;scheme=upi;package=;end;`;
+        // Check if it's Android
+        const isAndroid = /Android/i.test(navigator.userAgent);
         
-        // Method 2: Fallback to direct UPI scheme
-        const upiUrl = `upi://pay?pa=canteen@vp.college&pn=QuickBite&am=${amount}&cu=INR&tn=Order%20${orderId}`;
+        // Format UPI details
+        const upiId = 'canteen@vp.college';
+        const payeeName = 'QuickBite';
+        const note = `Order ${orderId}`;
         
-        // Method 3: App-specific intents as backup
-        const appIntents = {
-            gpay: `tez://pay?pa=canteen@vp.college&pn=QuickBite&am=${amount}&tn=Order%20${orderId}`,
-            phonepe: `phonepe://pay?pa=canteen@vp.college&pn=QuickBite&am=${amount}`,
-            paytm: `paytmmp://pay?pa=canteen@vp.college&pn=QuickBite&am=${amount}`
-        };
-
-        // Show UPI options with better handling
-        const upiOptions = document.getElementById('success-message');
-        upiOptions.innerHTML = `
+        // Method 1: Standard UPI URL
+        const upiUrl = `upi://pay?pa=${upiId}&pn=${payeeName}&am=${amount}&cu=INR&tn=${note}`;
+        
+        // Method 2: Intent URL for Android
+        const intentUrl = `intent://pay?pa=${upiId}&pn=${payeeName}&am=${amount}&cu=INR&tn=${note}#Intent;scheme=upi;package=;end;`;
+        
+        // App-specific intents
+        const gpayUrl = `tez://pay?pa=${upiId}&pn=${payeeName}&am=${amount}&tn=${note}`;
+        const phonepeUrl = `phonepe://pay?pa=${upiId}&pn=${payeeName}&am=${amount}`;
+        const paytmUrl = `paytmmp://pay?pa=${upiId}&pn=${payeeName}&am=${amount}`;
+        const bharatpeUrl = `bharatpe://pay?pa=${upiId}&pn=${payeeName}&am=${amount}`;
+        
+        // Show UPI options
+        const successMsg = document.getElementById('success-message');
+        successMsg.innerHTML = `
             <i class="fas fa-external-link-alt"></i> Choose UPI App:<br><br>
-            <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
-                <button onclick="window.location.href='${appIntents.gpay}'" 
-                    style="background: #3cba54; color: white; border: none; padding: 12px 20px; border-radius: 50px; font-weight: bold; display: flex; align-items: center; gap: 8px;">
-                    <i class="fab fa-google"></i> GPay
+            <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px;">
+                <button onclick="window.location.href='${gpayUrl}'" 
+                    style="background: #3cba54; color: white; border: none; padding: 15px; border-radius: 12px; font-weight: bold; font-size: 16px; display: flex; align-items: center; justify-content: center; gap: 10px;">
+                    <i class="fab fa-google"></i> Google Pay
                 </button>
-                <button onclick="window.location.href='${appIntents.phonepe}'" 
-                    style="background: #5f259f; color: white; border: none; padding: 12px 20px; border-radius: 50px; font-weight: bold; display: flex; align-items: center; gap: 8px;">
+                <button onclick="window.location.href='${phonepeUrl}'" 
+                    style="background: #5f259f; color: white; border: none; padding: 15px; border-radius: 12px; font-weight: bold; font-size: 16px; display: flex; align-items: center; justify-content: center; gap: 10px;">
                     <i class="fas fa-mobile-alt"></i> PhonePe
                 </button>
-                <button onclick="window.location.href='${appIntents.paytm}'" 
-                    style="background: #00baf2; color: white; border: none; padding: 12px 20px; border-radius: 50px; font-weight: bold; display: flex; align-items: center; gap: 8px;">
+                <button onclick="window.location.href='${paytmUrl}'" 
+                    style="background: #00baf2; color: white; border: none; padding: 15px; border-radius: 12px; font-weight: bold; font-size: 16px; display: flex; align-items: center; justify-content: center; gap: 10px;">
                     <i class="fas fa-wallet"></i> Paytm
                 </button>
+                <button onclick="window.location.href='${bharatpeUrl}'" 
+                    style="background: #e91e63; color: white; border: none; padding: 15px; border-radius: 12px; font-weight: bold; font-size: 16px; display: flex; align-items: center; justify-content: center; gap: 10px;">
+                    <i class="fas fa-peace"></i> BharatPe
+                </button>
             </div>
-            <br>
-            <small style="color: #666;">Try each app - if one doesn't open, try another</small>
-            <br>
-            <button onclick="window.location.href='${intentUrl}'" 
-                style="background: #d63031; color: white; border: none; padding: 8px 15px; border-radius: 25px; margin-top: 10px; font-size: 14px;">
-                Try with any UPI app →
-            </button>
+            <div style="margin-top: 10px; font-size: 14px; color: #666;">
+                <p>If no app opens, please pay manually:</p>
+                <div style="background: #f0f0f0; padding: 10px; border-radius: 8px;">
+                    <strong>UPI ID:</strong> ${upiId}<br>
+                    <strong>Amount:</strong> ₹${amount}<br>
+                    <strong>Note:</strong> ${note}
+                </div>
+            </div>
         `;
-        upiOptions.classList.add('show');
+        successMsg.classList.add('show');
         
-        // Try the intent URL first (works on most devices)
-        setTimeout(() => {
-            window.location.href = intentUrl;
-        }, 500);
+        // For Android, try intent URL
+        if (isAndroid) {
+            const iframe = document.createElement('iframe');
+            iframe.style.display = 'none';
+            iframe.src = intentUrl;
+            document.body.appendChild(iframe);
+            
+            setTimeout(() => {
+                document.body.removeChild(iframe);
+            }, 2000);
+        } else {
+            window.location.href = upiUrl;
+        }
         
     } else {
-        alert(`Please scan this QR code with your UPI app to pay ₹${amount}\n\nUPI ID: canteen@vp.college`);
+        alert(`UPI ID: canteen@vp.college\nAmount: ₹${amount}\nOrder: ${orderId}`);
     }
 }
 
@@ -247,57 +268,6 @@ function confirmOrder() {
         return;
     }
 
-
-    // Function to open UPI apps on mobile
-function openUPIApps(amount, orderId) {
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    
-    if (isMobile) {
-        // Multiple UPI intent formats for better compatibility
-        const upiUrl = `upi://pay?pa=canteen@vp.college&pn=QuickBite&am=${amount}&cu=INR&tn=Order%20${orderId}`;
-        const intentUrl = `intent://pay?pa=canteen@vp.college&pn=QuickBite&am=${amount}&cu=INR&tn=Order%20${orderId}#Intent;scheme=upi;package=;end;`;
-        
-        // App-specific intents
-        const appIntents = {
-            gpay: `tez://pay?pa=canteen@vp.college&pn=QuickBite&am=${amount}&tn=Order%20${orderId}`,
-            phonepe: `phonepe://pay?pa=canteen@vp.college&pn=QuickBite&am=${amount}`,
-            paytm: `paytmmp://pay?pa=canteen@vp.college&pn=QuickBite&am=${amount}`
-        };
-
-        // Show UPI options
-        const upiOptions = document.getElementById('success-message');
-        upiOptions.innerHTML = `
-            <i class="fas fa-external-link-alt"></i> Choose UPI App:<br><br>
-            <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
-                <button onclick="window.location.href='${appIntents.gpay}'" 
-                    style="background: #3cba54; color: white; border: none; padding: 12px 20px; border-radius: 50px; font-weight: bold;">
-                    <i class="fab fa-google"></i> GPay
-                </button>
-                <button onclick="window.location.href='${appIntents.phonepe}'" 
-                    style="background: #5f259f; color: white; border: none; padding: 12px 20px; border-radius: 50px; font-weight: bold;">
-                    <i class="fas fa-mobile-alt"></i> PhonePe
-                </button>
-                <button onclick="window.location.href='${appIntents.paytm}'" 
-                    style="background: #00baf2; color: white; border: none; padding: 12px 20px; border-radius: 50px; font-weight: bold;">
-                    <i class="fas fa-wallet"></i> Paytm
-                </button>
-            </div>
-            <br>
-            <button onclick="window.location.href='${intentUrl}'" 
-                style="background: #d63031; color: white; border: none; padding: 8px 15px; border-radius: 25px; margin-top: 10px;">
-                Try with any UPI app →
-            </button>
-        `;
-        upiOptions.classList.add('show');
-        
-        // Try intent URL first
-        window.location.href = intentUrl;
-        
-    } else {
-        alert(`UPI ID: canteen@vp.college\nAmount: ₹${amount}\nPlease use your phone to scan/pay`);
-    }
-}
-    
     // Calculate taxes
     const gst = subtotal * 0.05;
     const serviceTax = 5;
@@ -336,7 +306,7 @@ function openUPIApps(amount, orderId) {
     confirmBtn.disabled = true;
     
     // Save order to backend
-    fetch('https://quickbite-backend-z57f.onrender.com/place-order', {
+    fetch(`${BACKEND_URL}/place-order`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -357,13 +327,25 @@ function openUPIApps(amount, orderId) {
         
         // Handle payment based on method
         if (selectedMethod === 'online') {
+            // Show message that order is saved
+            const successMsg = document.getElementById('success-message');
+            successMsg.innerHTML = `
+                <i class="fas fa-check-circle"></i> Order Saved!<br>
+                <small>Token #${token} | Amount: ₹${finalAmount.toFixed(2)}</small>
+                <br>
+                <small style="color: #d63031;">Complete payment in UPI app</small>
+            `;
+            successMsg.classList.add('show');
+            
             // Open UPI apps
             openUPIApps(finalAmount.toFixed(2), orderId);
             
-            // Show success message after payment
+            // Ask if payment completed
             setTimeout(() => {
-                showSuccessMessage(orderData);
-            }, 5000);
+                if (confirm('Payment completed? Click OK to view your order.')) {
+                    showSuccessMessage(orderData);
+                }
+            }, 8000);
         } else {
             // Counter payment - direct success
             showSuccessMessage(orderData);
@@ -388,6 +370,14 @@ function openUPIApps(amount, orderId) {
         // Still proceed with UPI if online payment selected
         if (selectedMethod === 'online') {
             openUPIApps(finalAmount.toFixed(2), orderId);
+            
+            setTimeout(() => {
+                if (confirm('Payment completed? Click OK to view your order.')) {
+                    showSuccessMessage(orderData);
+                }
+            }, 8000);
+        } else {
+            showSuccessMessage(orderData);
         }
         
         // Restore button after error
@@ -395,85 +385,6 @@ function openUPIApps(amount, orderId) {
         confirmBtn.disabled = false;
     });
 }
-    
-    // Calculate taxes
-    const gst = subtotal * 0.05;
-    const serviceTax = 5;
-    const finalAmount = subtotal + gst + serviceTax;
-    
-    // Generate unique order ID
-    const orderId = 'ORD' + Date.now();
-    
-    // Create order object
-    const orderData = {
-        token: token,
-        items: cartItems.map(item => ({
-            name: item.name || 'Item',
-            price: parseFloat(item.price) || 0,
-            quantity: 1
-        })),
-        subtotal: subtotal,
-        gst: gst,
-        serviceTax: serviceTax,
-        amount: finalAmount,
-        method: selectedMethod,
-        time: new Date().toLocaleTimeString(),
-        date: new Date().toLocaleDateString(),
-        status: 'Processing',
-        orderId: orderId
-    };
-    
-    // Save order to backend - THIS IS WHERE THE FETCH GOES
-    fetch(`${BACKEND_URL}/place-order`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(orderData)
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Failed to place order');
-        }
-        return response.json();
-    })
-    .then(data => {
-        console.log('Order saved to backend:', data);
-        
-        // Also save to localStorage as backup
-        saveOrder(orderData);
-        
-        // Handle payment based on method
-        if (selectedMethod === 'online') {
-            // Open UPI apps
-            openUPIApps(finalAmount.toFixed(2), orderId);
-            
-            // Show success message after payment (simulated)
-            setTimeout(() => {
-                showSuccessMessage(orderData);
-            }, 5000);
-        } else {
-            // Counter payment - direct success
-            showSuccessMessage(orderData);
-        }
-    })
-    .catch(error => {
-        console.error('Error placing order:', error);
-        alert('Failed to connect to server. Order saved locally.');
-        
-        // Save locally as backup
-        saveOrder(orderData);
-        
-        // Still proceed with payment
-        if (selectedMethod === 'online') {
-            openUPIApps(finalAmount.toFixed(2), orderId);
-            setTimeout(() => {
-                showSuccessMessage(orderData);
-            }, 5000);
-        } else {
-            showSuccessMessage(orderData);
-        }
-    });
 
 // Save order to localStorage (backup)
 function saveOrder(order) {
@@ -515,7 +426,7 @@ function showSuccessMessage(order) {
     // Disable confirm button
     document.getElementById('main-btn').disabled = true;
     
-    // Clear cart from localStorage (check all possible keys)
+    // Clear cart from localStorage
     localStorage.removeItem('quickbite_cart');
     localStorage.removeItem('checkout_cart');
     localStorage.removeItem('canteenCart');
