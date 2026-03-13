@@ -633,6 +633,43 @@
             text-align: center;
         }
 
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 10px;
+            color: white;
+            font-weight: 500;
+            z-index: 3000;
+            animation: slideIn 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .toast.success {
+            background: #27ae60;
+        }
+
+        .toast.error {
+            background: #e74c3c;
+        }
+
+        .toast.info {
+            background: #3498db;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
         @media (max-width: 768px) {
             .navbar {
                 flex-direction: column;
@@ -928,6 +965,18 @@
         let selectedRole = 'student';
         let selectedRegisterRole = 'student';
 
+        // Toast notification function
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
         // Login modal functions
         function selectRole(role) {
             selectedRole = role;
@@ -954,55 +1003,16 @@
         }
 
         // CORRECTED HANDLE LOGIN FUNCTION
-       function handleLogin() {
-    const email = document.getElementById('login-email').value;
-    const password = document.getElementById('login-password').value;
-    const role = selectedRole;
+        function handleLogin() {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            const role = selectedRole;
 
-    // For admin role - special handling
-    if (role === 'admin') {
-        if (email === 'admin@canteen.com' && password === 'admin123') {
-            sessionStorage.setItem('adminAuth', 'true');
-            sessionStorage.setItem('userRole', 'admin');
-            sessionStorage.setItem('userName', 'Admin');
-            window.location.href = 'admin.html';
-        } else {
-            alert('Invalid admin credentials! Use: admin@canteen.com / admin123');
-        }
-        return;
-    }
-
-    // For student/staff - connect to backend
-    fetch('https://quickbite-backend-z577.onrender.com/login', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password })
-    })
-    .then(response => {
-        if (!response.ok) {
-            return response.json().then(err => { 
-                throw new Error(err.message); 
-            });
-        }
-        return response.json();
-    })
-    .then(data => {
-        // Store user info
-        localStorage.setItem('studentName', data.user.fullName);
-        localStorage.setItem('userEmail', data.user.email);
-        localStorage.setItem('userRole', role);
-        localStorage.setItem('isLoggedIn', 'true');
-        
-        alert(`Login successful! Welcome ${data.user.fullName}!`);
-        window.location.href = 'menu.html';
-    })
-    .catch(error => {
-        alert('Login failed: ' + error.message);
-        console.error('Login error:', error);
-    });
-
+            // Validation
+            if (!email || !password) {
+                showToast('Please enter email and password', 'error');
+                return;
+            }
 
             // For admin role - special handling
             if (role === 'admin') {
@@ -1010,15 +1020,18 @@
                     sessionStorage.setItem('adminAuth', 'true');
                     sessionStorage.setItem('userRole', 'admin');
                     sessionStorage.setItem('userName', 'Admin');
-                    window.location.href = 'admin.html';
+                    showToast('Welcome Admin! Redirecting...', 'success');
+                    setTimeout(() => {
+                        window.location.href = 'admin.html';
+                    }, 1000);
                 } else {
-                    alert('Invalid admin credentials! Use: admin@canteen.com / admin123');
+                    showToast('Invalid admin credentials! Use: admin@canteen.com / admin123', 'error');
                 }
                 return;
             }
 
             // For student/staff - connect to backend
-            fetch('https://quickbite-backend-z577.onrender.com/register', {
+            fetch('https://quickbite-backend-z577.onrender.com/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -1027,7 +1040,9 @@
             })
             .then(response => {
                 if (!response.ok) {
-                    return response.json().then(err => { throw new Error(err.message); });
+                    return response.json().then(err => { 
+                        throw new Error(err.message); 
+                    });
                 }
                 return response.json();
             })
@@ -1038,11 +1053,14 @@
                 localStorage.setItem('userRole', role);
                 localStorage.setItem('isLoggedIn', 'true');
                 
-                alert(`Login successful! Welcome ${data.user.fullName}!`);
-                window.location.href = 'menu.html';
+                showToast(`Login successful! Welcome ${data.user.fullName}!`, 'success');
+                
+                setTimeout(() => {
+                    window.location.href = 'menu.html';
+                }, 1000);
             })
             .catch(error => {
-                alert('Login failed: ' + error.message);
+                showToast('Login failed: ' + error.message, 'error');
                 console.error('Login error:', error);
             });
         }
@@ -1071,7 +1089,7 @@
             const password = document.getElementById('register-password').value;
 
             if (!fullName || !rollNo || !email || !password) {
-                alert('Please fill in all fields');
+                showToast('Please fill in all fields', 'error');
                 return;
             }
 
@@ -1095,12 +1113,14 @@
                 return response.json();
             })
             .then(data => {
-                alert(`Registration successful! Welcome ${fullName}!`);
+                showToast(`Registration successful! Welcome ${fullName}!`, 'success');
                 closeRegisterModal();
-                openLoginModal();
+                setTimeout(() => {
+                    openLoginModal();
+                }, 500);
             })
             .catch(error => {
-                alert('Registration failed: ' + error.message);
+                showToast('Registration failed: ' + error.message, 'error');
                 console.error('Registration error:', error);
             });
         }
