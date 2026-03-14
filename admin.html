@@ -6,8 +6,97 @@
     <title>QuickBite | Admin Panel</title>  
     <link rel="stylesheet" href="admin.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
+    <!-- Sidebar Menu -->
+    <div class="admin-sidebar" id="admin-sidebar">
+        <div class="sidebar-header">
+            <div class="close-sidebar" onclick="toggleSidebar()">×</div>
+            <div class="admin-profile">
+                <div class="admin-avatar">
+                    <i class="fas fa-user-shield"></i>
+                </div>
+                <h3>Admin</h3>
+                <p>Canteen Manager</p>
+            </div>
+        </div>
+        
+        <div class="sidebar-menu">
+            <div class="menu-item active" onclick="showDashboard()">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>Dashboard</span>
+            </div>
+            
+            <div class="menu-section">Management</div>
+            
+            <div class="menu-item" onclick="showMenuManagement()">
+                <i class="fas fa-utensils"></i>
+                <span>Menu Management</span>
+                <span class="menu-badge" id="menu-unavailable-badge" style="display: none;">!</span>
+            </div>
+            
+            <div class="menu-item" onclick="showTableManagement()">
+                <i class="fas fa-chair"></i>
+                <span>Table Management</span>
+                <span class="menu-badge" id="table-status-badge">10 seats</span>
+            </div>
+            
+            <div class="menu-section">Analytics</div>
+            
+            <div class="menu-item" onclick="showDailyAnalytics()">
+                <i class="fas fa-calendar-day"></i>
+                <span>Daily Report</span>
+            </div>
+            
+            <div class="menu-item" onclick="showWeeklyAnalytics()">
+                <i class="fas fa-calendar-week"></i>
+                <span>Weekly Report</span>
+            </div>
+            
+            <div class="menu-item" onclick="showMonthlyAnalytics()">
+                <i class="fas fa-calendar-alt"></i>
+                <span>Monthly Report</span>
+                <span class="menu-badge">Target</span>
+            </div>
+            
+            <div class="menu-section">Customers</div>
+            
+            <div class="menu-item" onclick="showRegularUsers()">
+                <i class="fas fa-users"></i>
+                <span>Regular Users</span>
+                <span class="menu-badge">Analytics</span>
+            </div>
+            
+            <div class="menu-item" onclick="showTopCustomers()">
+                <i class="fas fa-crown"></i>
+                <span>Top Customers</span>
+            </div>
+            
+            <div class="menu-section">Settings</div>
+            
+            <div class="menu-item" onclick="showSettings()">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+            </div>
+            
+            <div class="menu-item logout-item" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Overlay for mobile -->
+    <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+    <!-- Hamburger Menu Button -->
+    <div class="hamburger-btn" onclick="toggleSidebar()">
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
+
     <div id="login-container">
         <div class="login-box">
             <i class="fas fa-utensils" style="font-size: 3rem; color: #d63031; margin-bottom: 20px;"></i>
@@ -20,7 +109,9 @@
     <div id="admin-content">
         <div class="admin-box">
             <div class="header-actions">
-                <h1><i class="fas fa-chart-line" style="color: #d63031; margin-right: 10px;"></i>Canteen Dashboard 🛎️</h1>
+                <h1 onclick="goToDashboard()" style="cursor: pointer;" title="Click to go back to Orders">
+                    <i class="fas fa-chart-line" style="color: #d63031; margin-right: 10px;"></i>Canteen Dashboard 🛎️
+                </h1>
                 <div>
                     <button class="reset-btn" onclick="resetDay()"><i class="fas fa-trash"></i> Reset Day</button>
                     <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
@@ -28,22 +119,22 @@
             </div>
 
             <div class="stats-grid">
-                <div class="stat-card">
+                <div class="stat-card" onclick="showDailyAnalytics()">
                     <i class="fas fa-clock" style="color: #d63031;"></i>
                     <small>Processing Orders</small>
                     <h2 id="stat-count">0</h2>
                 </div>
-                <div class="stat-card">
+                <div class="stat-card" onclick="showDailyAnalytics()">
                     <i class="fas fa-check-circle" style="color: #27ae60;"></i>
                     <small>Ready to Pickup</small>
                     <h2 id="ready-count">0</h2>
                 </div>
-                <div class="stat-card">
+                <div class="stat-card" onclick="showMonthlyAnalytics()">
                     <i class="fas fa-rupee-sign" style="color: #d63031;"></i>
                     <small>Today's Revenue</small>
                     <h2 id="stat-revenue">₹0</h2>
                 </div>
-                <div class="stat-card">
+                <div class="stat-card" onclick="showMonthlyAnalytics()">
                     <i class="fas fa-shopping-bag" style="color: #d63031;"></i>
                     <small>Total Orders</small>
                     <h2 id="total-orders">0</h2>
@@ -51,50 +142,185 @@
             </div>
         </div>
 
-        <div class="admin-box">
-            <h3><i class="fas fa-fire" style="color: #d63031; margin-right: 10px;"></i>🔥 Kitchen Orders</h3>
-            
-            <div class="status-tabs">
-                <button class="tab-btn active" onclick="filterOrders('all')">All Orders</button>
-                <button class="tab-btn" onclick="filterOrders('Processing')">Processing</button>
-                <button class="tab-btn" onclick="filterOrders('Ready')">Ready to Pickup</button>
-                <button class="tab-btn" onclick="filterOrders('Completed')">Completed</button>
+        <!-- Main Content Area - Changes based on menu selection -->
+        <div id="main-content-area">
+            <!-- Live Orders Section (Default) -->
+            <div id="live-orders-section">
+                <div class="admin-box">
+                    <h3><i class="fas fa-fire" style="color: #d63031; margin-right: 10px;"></i>🔥 Kitchen Orders</h3>
+                    
+                    <div class="status-tabs">
+                        <button class="tab-btn active" onclick="filterOrders('all')">All Orders</button>
+                        <button class="tab-btn" onclick="filterOrders('Processing')">Processing</button>
+                        <button class="tab-btn" onclick="filterOrders('Ready')">Ready to Pickup</button>
+                        <button class="tab-btn" onclick="filterOrders('Completed')">Completed</button>
+                    </div>
+
+                    <div style="overflow-x: auto;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Token #</th>
+                                    <th>Items</th>
+                                    <th>Amount</th>
+                                    <th>Time</th>
+                                    <th>Payment</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="active-orders"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="admin-box">
+                    <h3><i class="fas fa-history" style="color: #d63031; margin-right: 10px;"></i>💰 Payment History</h3>
+                    <div style="overflow-x: auto;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Token</th>
+                                    <th>Items</th>
+                                    <th>Amount</th>
+                                    <th>Method</th>
+                                    <th>Time</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="payment-logs"></tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
 
-            <div style="overflow-x: auto;">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Token #</th>
-                            <th>Items</th>
-                            <th>Amount</th>
-                            <th>Time</th>
-                            <th>Payment</th>
-                            <th>Status</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="active-orders"></tbody>
-                </table>
+            <!-- Menu Management Section -->
+            <div id="menu-management-section" style="display: none;">
+                <div class="admin-box">
+                    <div class="management-header">
+                        <h3><i class="fas fa-utensils" style="color: #d63031;"></i> Menu Availability Management</h3>
+                        <button class="save-btn" onclick="saveMenuAvailability()"><i class="fas fa-save"></i> Save Changes</button>
+                    </div>
+                    
+                    <div class="menu-category-tabs">
+                        <button class="category-tab active" onclick="filterMenuCategory('all')">All Items</button>
+                        <button class="category-tab" onclick="filterMenuCategory('breakfast')">Breakfast</button>
+                        <button class="category-tab" onclick="filterMenuCategory('meals')">Main Meals</button>
+                        <button class="category-tab" onclick="filterMenuCategory('chinese')">Chinese</button>
+                        <button class="category-tab" onclick="filterMenuCategory('snacks')">Snacks</button>
+                        <button class="category-tab" onclick="filterMenuCategory('beverages')">Beverages</button>
+                    </div>
+                    
+                    <div class="menu-items-grid" id="menu-items-grid">
+                        <!-- Menu items will be loaded here dynamically -->
+                    </div>
+                    
+                    <div class="bulk-actions">
+                        <button class="bulk-btn" onclick="setAllAvailable(true)"><i class="fas fa-check-circle"></i> Set All Available</button>
+                        <button class="bulk-btn danger" onclick="setAllAvailable(false)"><i class="fas fa-times-circle"></i> Set All Unavailable</button>
+                    </div>
+                </div>
             </div>
-        </div>
 
-        <div class="admin-box">
-            <h3><i class="fas fa-history" style="color: #d63031; margin-right: 10px;"></i>💰 Payment History</h3>
-            <div style="overflow-x: auto;">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Token</th>
-                            <th>Items</th>
-                            <th>Amount</th>
-                            <th>Method</th>
-                            <th>Time</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="payment-logs"></tbody>
-                </table>
+            <!-- Table Management Section -->
+            <div id="table-management-section" style="display: none;">
+                <div class="admin-box">
+                    <div class="management-header">
+                        <h3><i class="fas fa-chair" style="color: #d63031;"></i> Table Availability Management</h3>
+                        <div class="table-stats">
+                            <span id="available-tables-count">10</span> / <span id="total-tables-count">20</span> Available
+                        </div>
+                    </div>
+                    
+                    <div class="table-controls">
+                        <div class="capacity-control">
+                            <label>Total Tables/Capacity:</label>
+                            <input type="number" id="total-tables" min="1" max="50" value="20">
+                            <button onclick="updateTotalTables()" class="update-btn">Update</button>
+                        </div>
+                        <div class="reset-tables">
+                            <button onclick="resetAllTables()" class="reset-tables-btn"><i class="fas fa-redo-alt"></i> Reset All Tables</button>
+                        </div>
+                    </div>
+                    
+                    <div class="tables-grid" id="tables-grid">
+                        <!-- Tables will be loaded here dynamically -->
+                    </div>
+                    
+                    <div class="table-legend">
+                        <div class="legend-item"><span class="legend-color available"></span> Available</div>
+                        <div class="legend-item"><span class="legend-color occupied"></span> Occupied</div>
+                        <div class="legend-item"><span class="legend-color reserved"></span> Reserved</div>
+                    </div>
+                    
+                    <div class="current-occupancy">
+                        <h4>Current Occupancy</h4>
+                        <div class="occupancy-details" id="occupancy-details">
+                            <p>No active table assignments</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analytics Section (Hidden by default) -->
+            <div id="analytics-section" style="display: none;">
+                <div class="admin-box">
+                    <div class="analytics-header">
+                        <h3 id="analytics-title"><i class="fas fa-chart-bar"></i> Daily Report</h3>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <button onclick="goToDashboard()" class="back-to-orders-btn" title="Back to Live Orders">
+                                <i class="fas fa-arrow-left"></i> Back to Orders
+                            </button>
+                            <div class="date-selector">
+                                <button class="date-nav-btn" onclick="changeDate(-1)"><i class="fas fa-chevron-left"></i></button>
+                                <span id="current-date-range">Today</span>
+                                <button class="date-nav-btn" onclick="changeDate(1)"><i class="fas fa-chevron-right"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="analytics-cards">
+                        <div class="analytics-card">
+                            <div class="analytics-icon"><i class="fas fa-shopping-bag"></i></div>
+                            <div class="analytics-details">
+                                <span class="analytics-label">Total Orders</span>
+                                <span class="analytics-value" id="analytics-total-orders">0</span>
+                            </div>
+                        </div>
+                        <div class="analytics-card">
+                            <div class="analytics-icon"><i class="fas fa-rupee-sign"></i></div>
+                            <div class="analytics-details">
+                                <span class="analytics-label">Total Revenue</span>
+                                <span class="analytics-value" id="analytics-total-revenue">₹0</span>
+                            </div>
+                        </div>
+                        <div class="analytics-card">
+                            <div class="analytics-icon"><i class="fas fa-users"></i></div>
+                            <div class="analytics-details">
+                                <span class="analytics-label">Unique Customers</span>
+                                <span class="analytics-value" id="analytics-unique-customers">0</span>
+                            </div>
+                        </div>
+                        <div class="analytics-card">
+                            <div class="analytics-icon"><i class="fas fa-trophy"></i></div>
+                            <div class="analytics-details">
+                                <span class="analytics-label">Avg. Order Value</span>
+                                <span class="analytics-value" id="analytics-avg-order">₹0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chart Container -->
+                    <div class="chart-container">
+                        <canvas id="analytics-chart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Regular Users Section -->
+                <div id="regular-users-section" class="admin-box" style="display: none;">
+                    <h3><i class="fas fa-star" style="color: #ffd700;"></i> Top Regular Customers</h3>
+                    <div class="users-list" id="regular-users-list"></div>
+                </div>
             </div>
         </div>
     </div>

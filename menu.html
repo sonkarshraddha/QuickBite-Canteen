@@ -9,21 +9,25 @@
 </head>
 <body>
     <!-- Sidebar Menu -->
-     
     <div class="sidebar" id="sidebar">
         <div class="close-btn" onclick="toggleSidebar()">×</div>
         <div class="sidebar-content">
             <div class="user-profile">
-    <div class="user-avatar" id="user-avatar">
-        👨‍🎓
-    </div>
-    <h3 id="user-greeting">Hello, User!</h3>
-    <p id="user-role">Student</p>
-    <div class="timing-badge">
-        <i class="fas fa-clock"></i>
-        Canteen Open: 11 AM - 6 PM
-    </div>
-</div>
+                <div class="user-avatar" id="user-avatar">
+                    👨‍🎓
+                </div>
+                <h3 id="user-greeting">Hello, User!</h3>
+                <p id="user-role">Student</p>
+                <!-- Table Status Indicator -->
+                <div class="table-status-indicator" id="table-status-indicator" onclick="showTableAvailability()">
+                    <i class="fas fa-chair"></i>
+                    <span id="table-availability-text">Checking tables...</span>
+                </div>
+                <div class="timing-badge">
+                    <i class="fas fa-clock"></i>
+                    Canteen Open: 11 AM - 6 PM
+                </div>
+            </div>
 
             <div class="sidebar-menu-item active" onclick="showOffers()">
                 <i class="fas fa-tags"></i>
@@ -59,8 +63,108 @@
         </div>
     </div>
 
+    <!-- Table Availability Modal -->
+    <div id="table-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-chair"></i> Table Availability</h3>
+                <span class="close-modal" onclick="closeTableModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="table-legend">
+                    <div class="legend-item"><span class="legend-color available"></span> Available</div>
+                    <div class="legend-item"><span class="legend-color occupied"></span> Occupied</div>
+                    <div class="legend-item"><span class="legend-color reserved"></span> Reserved</div>
+                </div>
+                <div class="tables-display-grid" id="tables-display-grid">
+                    <!-- Tables will be loaded here -->
+                </div>
+                <div class="canteen-status" id="canteen-status"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn" onclick="closeTableModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Type Modal (Shows after checkout click) -->
+    <div id="order-type-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-shopping-cart"></i> Choose Order Type</h3>
+                <span class="close-modal" onclick="closeOrderTypeModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="order-type-options">
+                    <div class="order-type-card" onclick="selectOrderType('takeaway')">
+                        <div class="order-type-icon">
+                            <i class="fas fa-shopping-bag"></i>
+                        </div>
+                        <h4>Takeaway</h4>
+                        <p>Pack your food to go</p>
+                        <ul class="order-type-features">
+                            <li><i class="fas fa-check-circle"></i> No waiting for table</li>
+                            <li><i class="fas fa-check-circle"></i> Quick pickup</li>
+                            <li><i class="fas fa-check-circle"></i> Available anytime</li>
+                        </ul>
+                        <button class="order-type-btn" onclick="selectOrderType('takeaway')">Choose Takeaway</button>
+                    </div>
+                    
+                    <div class="order-type-card" onclick="selectOrderType('dinein')">
+                        <div class="order-type-icon">
+                            <i class="fas fa-utensils"></i>
+                        </div>
+                        <h4>Dine-In</h4>
+                        <p>Enjoy your meal at canteen</p>
+                        <div class="table-availability-badge" id="dinein-availability">
+                            Checking tables...
+                        </div>
+                        <ul class="order-type-features">
+                            <li><i class="fas fa-check-circle"></i> Freshly served</li>
+                            <li><i class="fas fa-check-circle"></i> Comfortable seating</li>
+                            <li><i class="fas fa-check-circle"></i> Campus vibe</li>
+                        </ul>
+                        <button class="order-type-btn dinein-btn" onclick="selectOrderType('dinein')">Choose Dine-In</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Table Selection Modal (For Dine-In) -->
+    <div id="table-selection-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-chair"></i> Select Your Table</h3>
+                <span class="close-modal" onclick="closeTableSelectionModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="table-legend">
+                    <div class="legend-item"><span class="legend-color available"></span> Available</div>
+                    <div class="legend-item"><span class="legend-color occupied"></span> Occupied</div>
+                    <div class="legend-item"><span class="legend-color reserved"></span> Reserved</div>
+                </div>
+                <div class="tables-selection-grid" id="tables-selection-grid">
+                    <!-- Tables will be loaded here -->
+                </div>
+                <div id="no-tables-message" class="no-tables-message" style="display: none;">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <p>No tables available right now. Please try takeaway or wait.</p>
+                    <button class="takeaway-suggestion-btn" onclick="selectOrderType('takeaway')">
+                        <i class="fas fa-shopping-bag"></i> Switch to Takeaway
+                    </button>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn cancel-btn" onclick="closeTableSelectionModal()">Cancel</button>
+                <button class="modal-btn confirm-btn" id="confirm-table-btn" onclick="confirmTableSelection()" disabled>Confirm Table</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Overlay -->
     <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+    <div class="modal-overlay" id="modal-overlay" onclick="closeAllModals()"></div>
 
     <!-- Hamburger Menu Button -->
     <div class="menu-btn" onclick="toggleSidebar()">
@@ -75,509 +179,51 @@
             <p>Your College Canteen - Fresh & Affordable Food</p>
             <div class="timing-info" id="timing-info">
                 <i class="fas fa-clock"></i>
-                Open Today: 11:00 AM - 4:00 PM
+                Open Today: 11:00 AM - 6:00 PM
                 <i class="fas fa-graduation-cap" style="margin-left: 10px;"></i>
+            </div>
+            <!-- Live Table Availability Banner -->
+            <div class="live-availability" id="live-availability" onclick="showTableAvailability()">
+                <i class="fas fa-chair"></i>
+                <span id="availability-message">Loading table availability...</span>
+                <span class="view-tables-link">View Tables →</span>
             </div>
         </header>
 
         <!-- Heavy Breakfast Section -->
         <h2 class="category-title">🌅 Heavy Breakfast</h2>
-        <div class="menu-grid">
-            <!-- Veg Sandwich -->
-            <div class="food-card">
-                <img src="sandwhich.png" alt="Veg Sandwich" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%23f39c12\'/%3E%3Ctext x=\'50\' y=\'120\' fill=\'white\' font-size=\'24\'%3E🥪 Sandwich%3C/text%3E%3C/svg%3E'">
-                <div class="card-info">
-                    <h3>Veg Sandwich</h3>
-                    <p>Grilled sandwich with fresh veggies and cheese</p>
-                    <span class="price">₹35</span>
-                    <div class="button-group">
-                        <button class="add-btn" onclick="addToCart('Veg Sandwich', 35, this)">Add +</button>
-                        <button class="remove-btn" onclick="removeOneFromCart('Veg Sandwich', this)" disabled>−</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Veg Maggi -->
-            <div class="food-card">
-                <img src="maggi.png" alt="Veg Maggi" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%23e67e22\'/%3E%3Ctext x=\'50\' y=\'120\' fill=\'white\' font-size=\'24\'%3E🍜 Maggi%3C/text%3E%3C/svg%3E'">
-                <div class="card-info">
-                    <h3>Veg Maggi</h3>
-                    <p>Hot & spicy noodles with veggies</p>
-                    <span class="price">₹40</span>
-                    <div class="button-group">
-                        <button class="add-btn" onclick="addToCart('Veg Maggi', 40, this)">Add +</button>
-                        <button class="remove-btn" onclick="removeOneFromCart('Veg Maggi', this)" disabled>−</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Poha -->
-            <div class="food-card">
-                <img src="poha.png" alt="Poha" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%2395a5a6\'/%3E%3Ctext x=\'50\' y=\'120\' fill=\'white\' font-size=\'24\'%3E🥣 Poha%3C/text%3E%3C/svg%3E'">
-                <div class="card-info">
-                    <h3>Poha</h3>
-                    <p>Flattened rice with peanuts and lemon</p>
-                    <span class="price">₹25</span>
-                    <div class="button-group">
-                        <button class="add-btn" onclick="addToCart('Poha', 25, this)">Add +</button>
-                        <button class="remove-btn" onclick="removeOneFromCart('Poha', this)" disabled>−</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Upma -->
-            <div class="food-card">
-                <img src="upma.png" alt="Upma" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%23f1c40f\'/%3E%3Ctext x=\'50\' y=\'120\' fill=\'white\' font-size=\'24\'%3E🥘 Upma%3C/text%3E%3C/svg%3E'">
-                <div class="card-info">
-                    <h3>Upma</h3>
-                    <p>South Indian semolina breakfast</p>
-                    <span class="price">₹25</span>
-                    <div class="button-group">
-                        <button class="add-btn" onclick="addToCart('Upma', 25, this)">Add +</button>
-                        <button class="remove-btn" onclick="removeOneFromCart('Upma', this)" disabled>−</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Aloo Paratha -->
-            <div class="food-card">
-                <img src="paratha.png" alt="Aloo Paratha" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%23e67e22\'/%3E%3Ctext x=\'50\' y=\'120\' fill=\'white\' font-size=\'24\'%3E🫓 Paratha%3C/text%3E%3C/svg%3E'">
-                <div class="card-info">
-                    <h3>Aloo Paratha</h3>
-                    <p>Stuffed potato paratha with curd & pickle</p>
-                    <span class="price">₹45</span>
-                    <div class="button-group">
-                        <button class="add-btn" onclick="addToCart('Aloo Paratha', 45, this)">Add +</button>
-                        <button class="remove-btn" onclick="removeOneFromCart('Aloo Paratha', this)" disabled>−</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Chole Bhature -->
-            <div class="food-card">
-                <img src="chole-bhature.png" alt="Chole Bhature" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%23c0392b\'/%3E%3Ctext x=\'50\' y=\'120\' fill=\'white\' font-size=\'24\'%3E🍛 Chole Bhature%3C/text%3E%3C/svg%3E'">
-                <div class="card-info">
-                    <h3>Chole Bhature</h3>
-                    <p>Spicy chickpea curry with fried bread</p>
-                    <span class="price">₹60</span>
-                    <div class="button-group">
-                        <button class="add-btn" onclick="addToCart('Chole Bhature', 60, this)">Add +</button>
-                        <button class="remove-btn" onclick="removeOneFromCart('Chole Bhature', this)" disabled>−</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Samosa -->
-            <div class="food-card">
-                <img src="samosa.png" alt="Samosa" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%23d35400\'/%3E%3Ctext x=\'50\' y=\'120\' fill=\'white\' font-size=\'24\'%3E🥟 Samosa%3C/text%3E%3C/svg%3E'">
-                <div class="card-info">
-                    <h3>Samosa (2 pcs)</h3>
-                    <p>Crispy pastry with spiced potato filling</p>
-                    <span class="price">₹20</span>
-                    <div class="button-group">
-                        <button class="add-btn" onclick="addToCart('Samosa', 20, this)">Add +</button>
-                        <button class="remove-btn" onclick="removeOneFromCart('Samosa', this)" disabled>−</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Bread Pakora -->
-            <div class="food-card">
-                <img src="bread-pakora.png" alt="Bread Pakora" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%23f39c12\'/%3E%3Ctext x=\'50\' y=\'120\' fill=\'white\' font-size=\'24\'%3E🍞 Bread Pakora%3C/text%3E%3C/svg%3E'">
-                <div class="card-info">
-                    <h3>Bread Pakora</h3>
-                    <p>Bread fritter with chutney</p>
-                    <span class="price">₹25</span>
-                    <div class="button-group">
-                        <button class="add-btn" onclick="addToCart('Bread Pakora', 25, this)">Add +</button>
-                        <button class="remove-btn" onclick="removeOneFromCart('Bread Pakora', this)" disabled>−</button>
-                    </div>
-                </div>
-            </div>
+        <div class="menu-grid" id="breakfast-items">
+            <!-- Items will be loaded dynamically with availability status -->
         </div>
 
         <!-- Main Meals Section -->
         <h2 class="category-title">🍛 Main Meals (Lunch/Dinner)</h2>
-        <div class="menu-grid">
-            <!-- North Indian Thali -->
-            <div class="food-card">
-                <img src="north-thali.png" alt="North Indian Thali" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%2327ae60\'/%3E%3Ctext x=\'50\' y=\'120\' fill=\'white\' font-size=\'24\'%3E🍱 North Thali%3C/text%3E%3C/svg%3E'">
-                <div class="card-info">
-                    <h3>North Indian Thali</h3>
-                    <p>2 Rotis, Sabzi, Rice, Dal, Salad</p>
-                    <span class="price">₹80</span>
-                    <div class="button-group">
-                        <button class="add-btn" onclick="addToCart('North Indian Thali', 80, this)">Add +</button>
-                        <button class="remove-btn" onclick="removeOneFromCart('North Indian Thali', this)" disabled>−</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- South Indian Thali -->
-            <div class="food-card">
-                <img src="south-thali.png" alt="South Indian Thali" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%239b59b6\'/%3E%3Ctext x=\'50\' y=\'120\' fill=\'white\' font-size=\'24\'%3E🍚 South Thali%3C/text%3E%3C/svg%3E'">
-                <div class="card-info">
-                    <h3>South Indian Thali</h3>
-                    <p>Rice, Sambhar, Rasam, Veg, Papad</p>
-                    <span class="price">₹75</span>
-                    <div class="button-group">
-                        <button class="add-btn" onclick="addToCart('South Indian Thali', 75, this)">Add +</button>
-                        <button class="remove-btn" onclick="removeOneFromCart('South Indian Thali', this)" disabled>−</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Veg Biryani -->
-            <div class="food-card">
-                <img src="biryani.png" alt="Veg Biryani" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%23e67e22\'/%3E%3Ctext x=\'50\' y=\'120\' fill=\'white\' font-size=\'24\'%3E🍛 Biryani%3C/text%3E%3C/svg%3E'">
-                <div class="card-info">
-                    <h3>Veg Biryani</h3>
-                    <p>Aromatic rice with veggies & raita</p>
-                    <span class="price">₹65</span>
-                    <div class="button-group">
-                        <button class="add-btn" onclick="addToCart('Veg Biryani', 65, this)">Add +</button>
-                        <button class="remove-btn" onclick="removeOneFromCart('Veg Biryani', this)" disabled>−</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Rajma Chawal -->
-            <div class="food-card">
-                <img src="rajma.png" alt="Rajma Chawal" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%23c0392b\'/%3E%3Ctext x=\'50\' y=\'120\' fill=\'white\' font-size=\'24\'%3E🥘 Rajma Chawal%3C/text%3E%3C/svg%3E'">
-                <div class="card-info">
-                    <h3>Rajma Chawal</h3>
-                    <p>Kidney bean curry with steamed rice</p>
-                    <span class="price">₹50</span>
-                    <div class="button-group">
-                        <button class="add-btn" onclick="addToCart('Rajma Chawal', 50, this)">Add +</button>
-                        <button class="remove-btn" onclick="removeOneFromCart('Rajma Chawal', this)" disabled>−</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Kadhi Chawal -->
-            <div class="food-card">
-                <img src="kadhi.png" alt="Kadhi Chawal" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%23f1c40f\'/%3E%3Ctext x=\'50\' y=\'120\' fill=\'white\' font-size=\'24\'%3E🥣 Kadhi Chawal%3C/text%3E%3C/svg%3E'">
-                <div class="card-info">
-                    <h3>Kadhi Chawal</h3>
-                    <p>Yogurt curry with rice and pakoras</p>
-                    <span class="price">₹50</span>
-                    <div class="button-group">
-                        <button class="add-btn" onclick="addToCart('Kadhi Chawal', 50, this)">Add +</button>
-                        <button class="remove-btn" onclick="removeOneFromCart('Kadhi Chawal', this)" disabled>−</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Pulao + Curd -->
-            <div class="food-card">
-                <img src="pulao.png" alt="Pulao" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%2327ae60\'/%3E%3Ctext x=\'50\' y=\'120\' fill=\'white\' font-size=\'24\'%3E🍚 Pulao%3C/text%3E%3C/svg%3E'">
-                <div class="card-info">
-                    <h3>Veg Pulao + Curd</h3>
-                    <p>Flavored rice with raita</p>
-                    <span class="price">₹45</span>
-                    <div class="button-group">
-                        <button class="add-btn" onclick="addToCart('Veg Pulao', 45, this)">Add +</button>
-                        <button class="remove-btn" onclick="removeOneFromCart('Veg Pulao', this)" disabled>−</button>
-                    </div>
-                </div>
-            </div>
+        <div class="menu-grid" id="meals-items">
+            <!-- Items will be loaded dynamically with availability status -->
         </div>
 
         <!-- Chinese Corner -->
         <h2 class="category-title">🥢 Chinese Corner</h2>
-        <div class="menu-grid">
-            <!-- Veg Chowmein -->
-            <div class="food-card">
-                <img src="chowmein.png" alt="Veg Chowmein" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%23e67e22\'/%3E%3Ctext x=\'50\' y=\'120\' fill=\'white\' font-size=\'24\'%3E🍜 Chowmein%3C/text%3E%3C/svg%3E'">
-                <div class="card-info">
-                    <h3>Veg Chowmein</h3>
-                    <p>Hakka noodles with veggies</p>
-                    <span class="price">₹50</span>
-                    <div class="button-group">
-                        <button class="add-btn" onclick="addToCart('Veg Chowmein', 50, this)">Add +</button>
-                        <button class="remove-btn" onclick="removeOneFromCart('Veg Chowmein', this)" disabled>−</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Gobi Manchurian -->
-            <div class="food-card">
-                <img src="manchurian.png" alt="Gobi Manchurian" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%23d35400\'/%3E%3Ctext x=\'50\' y=\'120\' fill=\'white\' font-size=\'24\'%3E🥦 Manchurian%3C/text%3E%3C/svg%3E'">
-                <div class="card-info">
-                    <h3>Gobi Manchurian</h3>
-                    <p>Cauliflower in spicy sauce</p>
-                    <span class="price">₹60</span>
-                    <div class="button-group">
-                        <button class="add-btn" onclick="addToCart('Gobi Manchurian', 60, this)">Add +</button>
-                        <button class="remove-btn" onclick="removeOneFromCart('Gobi Manchurian', this)" disabled>−</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Spring Rolls -->
-            <div class="food-card">
-                <img src="spring-rolls.png" alt="Spring Rolls" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%239b59b6\'/%3E%3Ctext x=\'50\' y=\'120\' fill=\'white\' font-size=\'24\'%3E🌯 Spring Rolls%3C/text%3E%3C/svg%3E'">
-                <div class="card-info">
-                    <h3>Spring Rolls (2 pcs)</h3>
-                    <p>Crispy veg rolls with sauce</p>
-                    <span class="price">₹40</span>
-                    <div class="button-group">
-                        <button class="add-btn" onclick="addToCart('Spring Rolls', 40, this)">Add +</button>
-                        <button class="remove-btn" onclick="removeOneFromCart('Spring Rolls', this)" disabled>−</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Chilli Potato -->
-            <div class="food-card">
-                <img src="chilli-potato.png" alt="Chilli Potato" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%23e74c3c\'/%3E%3Ctext x=\'50\' y=\'120\' fill=\'white\' font-size=\'24\'%3E🥔 Chilli Potato%3C/text%3E%3C/svg%3E'">
-                <div class="card-info">
-                    <h3>Chilli Potato</h3>
-                    <p>Crispy potatoes in chilli sauce</p>
-                    <span class="price">₹55</span>
-                    <div class="button-group">
-                        <button class="add-btn" onclick="addToCart('Chilli Potato', 55, this)">Add +</button>
-                        <button class="remove-btn" onclick="removeOneFromCart('Chilli Potato', this)" disabled>−</button>
-                    </div>
-                </div>
-            </div>
+        <div class="menu-grid" id="chinese-items">
+            <!-- Items will be loaded dynamically with availability status -->
         </div>
 
         <!-- Quick Bites & Snacks -->
         <h2 class="category-title">🍟 Quick Bites & Snacks</h2>
-        <div class="menu-grid">
-            <!-- Vada Pav -->
-            <div class="food-card">
-                <img src="vada-pav.png" alt="Vada Pav" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%23f39c12\'/%3E%3Ctext x=\'50\' y=\'120\' fill=\'white\' font-size=\'24\'%3E🥪 Vada Pav%3C/text%3E%3C/svg%3E'">
-                <div class="card-info">
-                    <h3>Vada Pav</h3>
-                    <p>Mumbai style spicy vada in bun</p>
-                    <span class="price">₹20</span>
-                    <div class="button-group">
-                        <button class="add-btn" onclick="addToCart('Vada Pav', 20, this)">Add +</button>
-                        <button class="remove-btn" onclick="removeOneFromCart('Vada Pav', this)" disabled>−</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Pav Bhaji -->
-            <div class="food-card">
-                <img src="pav-bhaji.png" alt="Pav Bhaji" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%23e67e22\'/%3E%3Ctext x=\'50\' y=\'120\' fill=\'white\' font-size=\'24\'%3E🍛 Pav Bhaji%3C/text%3E%3C/svg%3E'">
-                <div class="card-info">
-                    <h3>Pav Bhaji (2 Pav)</h3>
-                    <p>Mixed veg curry with buttered buns</p>
-                    <span class="price">₹80</span>
-                    <div class="button-group">
-                        <button class="add-btn" onclick="addToCart('Pav Bhaji', 80, this)">Add +</button>
-                        <button class="remove-btn" onclick="removeOneFromCart('Pav Bhaji', this)" disabled>−</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Veg Frankie -->
-            <div class="food-card">
-                <img src="frankie.png" alt="Veg Frankie" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%2327ae60\'/%3E%3Ctext x=\'50\' y=\'120\' fill=\'white\' font-size=\'24\'%3E🌯 Frankie%3C/text%3E%3C/svg%3E'">
-                <div class="card-info">
-                    <h3>Veg Frankie</h3>
-                    <p>Rolled roti with spicy veg filling</p>
-                    <span class="price">₹50</span>
-                    <div class="button-group">
-                        <button class="add-btn" onclick="addToCart('Veg Frankie', 50, this)">Add +</button>
-                        <button class="remove-btn" onclick="removeOneFromCart('Veg Frankie', this)" disabled>−</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- French Fries -->
-            <div class="food-card">
-                <img src="fries.png" alt="French Fries" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%23f1c40f\'/%3E%3Ctext x=\'50\' y=\'120\' fill=\'white\' font-size=\'24\'%3E🍟 Fries%3C/text%3E%3C/svg%3E'">
-                <div class="card-info">
-                    <h3>French Fries</h3>
-                    <p>Crispy potato fries with seasoning</p>
-                    <span class="price">₹45</span>
-                    <div class="button-group">
-                        <button class="add-btn" onclick="addToCart('French Fries', 45, this)">Add +</button>
-                        <button class="remove-btn" onclick="removeOneFromCart('French Fries', this)" disabled>−</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Veg Cutlet -->
-            <div class="food-card">
-                <img src="cutlet.png" alt="Veg Cutlet" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%2395a5a6\'/%3E%3Ctext x=\'50\' y=\'120\' fill=\'white\' font-size=\'24\'%3E🍘 Cutlet%3C/text%3E%3C/svg%3E'">
-                <div class="card-info">
-                    <h3>Veg Cutlet (2 pcs)</h3>
-                    <p>Breaded veg patties with chutney</p>
-                    <span class="price">₹35</span>
-                    <div class="button-group">
-                        <button class="add-btn" onclick="addToCart('Veg Cutlet', 35, this)">Add +</button>
-                        <button class="remove-btn" onclick="removeOneFromCart('Veg Cutlet', this)" disabled>−</button>
-                    </div>
-                </div>
-            </div>
+        <div class="menu-grid" id="snacks-items">
+            <!-- Items will be loaded dynamically with availability status -->
         </div>
 
         <!-- Beverages -->
         <h2 class="category-title">☕ Beverages</h2>
-        <div class="menu-grid">
-            <!-- Chai -->
-            <div class="food-card">
-                <img src="chai.png" alt="Chai" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%238e44ad\'/%3E%3Ctext x=\'50\' y=\'120\' fill=\'white\' font-size=\'24\'%3E☕ Chai%3C/text%3E%3C/svg%3E'">
-                <div class="card-info">
-                    <h3>Masala Chai</h3>
-                    <p>Hot spiced tea</p>
-                    <span class="price">₹10</span>
-                    <div class="button-group">
-                        <button class="add-btn" onclick="addToCart('Masala Chai', 10, this)">Add +</button>
-                        <button class="remove-btn" onclick="removeOneFromCart('Masala Chai', this)" disabled>−</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Coffee -->
-            <div class="food-card">
-                <img src="coffee.png" alt="Coffee" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%236d4c41\'/%3E%3Ctext x=\'50\' y=\'120\' fill=\'white\' font-size=\'24\'%3E☕ Coffee%3C/text%3E%3C/svg%3E'">
-                <div class="card-info">
-                    <h3>Filter Coffee</h3>
-                    <p>South Indian filter coffee</p>
-                    <span class="price">₹15</span>
-                    <div class="button-group">
-                        <button class="add-btn" onclick="addToCart('Filter Coffee', 15, this)">Add +</button>
-                        <button class="remove-btn" onclick="removeOneFromCart('Filter Coffee', this)" disabled>−</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Cold Coffee -->
-            <div class="food-card">
-                <img src="cold-coffee.png" alt="Cold Coffee" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%233f51b5\'/%3E%3Ctext x=\'50\' y=\'120\' fill=\'white\' font-size=\'24\'%3E🥤 Cold Coffee%3C/text%3E%3C/svg%3E'">
-                <div class="card-info">
-                    <h3>Cold Coffee</h3>
-                    <p>Chilled coffee with ice cream</p>
-                    <span class="price">₹40</span>
-                    <div class="button-group">
-                        <button class="add-btn" onclick="addToCart('Cold Coffee', 40, this)">Add +</button>
-                        <button class="remove-btn" onclick="removeOneFromCart('Cold Coffee', this)" disabled>−</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Lassi -->
-            <div class="food-card">
-                <img src="lassi.png" alt="Lassi" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%23f8c291\'/%3E%3Ctext x=\'50\' y=\'120\' fill=\'white\' font-size=\'24\'%3E🥛 Lassi%3C/text%3E%3C/svg%3E'">
-                <div class="card-info">
-                    <h3>Sweet Lassi</h3>
-                    <p>Thick yogurt drink</p>
-                    <span class="price">₹35</span>
-                    <div class="button-group">
-                        <button class="add-btn" onclick="addToCart('Sweet Lassi', 35, this)">Add +</button>
-                        <button class="remove-btn" onclick="removeOneFromCart('Sweet Lassi', this)" disabled>−</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Buttermilk -->
-            <div class="food-card">
-                <img src="buttermilk.png" alt="Buttermilk" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%23b8e994\'/%3E%3Ctext x=\'50\' y=\'120\' fill=\'white\' font-size=\'24\'%3E🥛 Buttermilk%3C/text%3E%3C/svg%3E'">
-                <div class="card-info">
-                    <h3>Masala Buttermilk</h3>
-                    <p>Spiced yogurt drink</p>
-                    <span class="price">₹25</span>
-                    <div class="button-group">
-                        <button class="add-btn" onclick="addToCart('Buttermilk', 25, this)">Add +</button>
-                        <button class="remove-btn" onclick="removeOneFromCart('Buttermilk', this)" disabled>−</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Lemon Soda -->
-            <div class="food-card">
-                <img src="lemon-soda.png" alt="Lemon Soda" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%23f6e58d\'/%3E%3Ctext x=\'50\' y=\'120\' fill=\'white\' font-size=\'24\'%3E🍋 Lemon Soda%3C/text%3E%3C/svg%3E'">
-                <div class="card-info">
-                    <h3>Lemon Soda</h3>
-                    <p>Fresh lime with soda</p>
-                    <span class="price">₹20</span>
-                    <div class="button-group">
-                        <button class="add-btn" onclick="addToCart('Lemon Soda', 20, this)">Add +</button>
-                        <button class="remove-btn" onclick="removeOneFromCart('Lemon Soda', this)" disabled>−</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Cold Drink -->
-            <div class="food-card">
-                <img src="cold-drink.png" alt="Cold Drink" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%23ffb8b8\'/%3E%3Ctext x=\'50\' y=\'120\' fill=\'white\' font-size=\'24\'%3E🥤 Cold Drink%3C/text%3E%3C/svg%3E'">
-                <div class="card-info">
-                    <h3>Cold Drink (500ml)</h3>
-                    <p>Assorted soft drinks</p>
-                    <span class="price">₹25</span>
-                    <div class="button-group">
-                        <button class="add-btn" onclick="addToCart('Cold Drink', 25, this)">Add +</button>
-                        <button class="remove-btn" onclick="removeOneFromCart('Cold Drink', this)" disabled>−</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Chocolate Shake -->
-            <div class="food-card">
-                <img src="chocolate-shake.png" alt="Chocolate Shake" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%237b5e57\'/%3E%3Ctext x=\'50\' y=\'120\' fill=\'white\' font-size=\'24\'%3E🍫 Shake%3C/text%3E%3C/svg%3E'">
-                <div class="card-info">
-                    <h3>Chocolate Shake</h3>
-                    <p>Thick chocolate milkshake</p>
-                    <span class="price">₹50</span>
-                    <div class="button-group">
-                        <button class="add-btn" onclick="addToCart('Chocolate Shake', 50, this)">Add +</button>
-                        <button class="remove-btn" onclick="removeOneFromCart('Chocolate Shake', this)" disabled>−</button>
-                    </div>
-                </div>
-            </div>
+        <div class="menu-grid" id="beverages-items">
+            <!-- Items will be loaded dynamically with availability status -->
         </div>
 
         <!-- Late Night/Chai Time Combos -->
         <h2 class="category-title">🌙 Late Night Combos</h2>
-        <div class="menu-grid">
-            <!-- Bun Maska + Chai -->
-            <div class="food-card">
-                <img src="bun-maska.png" alt="Bun Maska" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%23d2a679\'/%3E%3Ctext x=\'50\' y=\'120\' fill=\'white\' font-size=\'24\'%3E🥐 Bun Maska%3C/text%3E%3C/svg%3E'">
-                <div class="card-info">
-                    <h3>Bun Maska + Chai</h3>
-                    <p>Buttered bun with hot tea</p>
-                    <span class="price">₹30</span>
-                    <div class="button-group">
-                        <button class="add-btn" onclick="addToCart('Bun Maska Combo', 30, this)">Add +</button>
-                        <button class="remove-btn" onclick="removeOneFromCart('Bun Maska Combo', this)" disabled>−</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Toast & Jam + Chai -->
-            <div class="food-card">
-                <img src="toast.png" alt="Toast & Jam" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%23e67e22\'/%3E%3Ctext x=\'50\' y=\'120\' fill=\'white\' font-size=\'24\'%3E🍞 Toast & Jam%3C/text%3E%3C/svg%3E'">
-                <div class="card-info">
-                    <h3>Toast & Jam + Chai</h3>
-                    <p>2 toast slices with jam and tea</p>
-                    <span class="price">₹25</span>
-                    <div class="button-group">
-                        <button class="add-btn" onclick="addToCart('Toast Jam Combo', 25, this)">Add +</button>
-                        <button class="remove-btn" onclick="removeOneFromCart('Toast Jam Combo', this)" disabled>−</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Packet Chips -->
-            <div class="food-card">
-                <img src="chips.png" alt="Packet Chips" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%23f39c12\'/%3E%3Ctext x=\'50\' y=\'120\' fill=\'white\' font-size=\'24\'%3E🥔 Potato Chips%3C/text%3E%3C/svg%3E'">
-                <div class="card-info">
-                    <h3>Packet Chips</h3>
-                    <p>Assorted flavors (Lays/Kurkure)</p>
-                    <span class="price">₹10</span>
-                    <div class="button-group">
-                        <button class="add-btn" onclick="addToCart('Packet Chips', 10, this)">Add +</button>
-                        <button class="remove-btn" onclick="removeOneFromCart('Packet Chips', this)" disabled>−</button>
-                    </div>
-                </div>
-            </div>
+        <div class="menu-grid" id="combo-items">
+            <!-- Items will be loaded dynamically with availability status -->
         </div>
     </div>
 
@@ -591,7 +237,7 @@
                 <span><i class="fas fa-shopping-cart"></i> <span id="cart-count">0</span></span>
                 <span><i class="fas fa-rupee-sign"></i> <span id="total-price">0</span></span>
                 <button class="clear-cart-btn" onclick="clearCart()">Clear</button>
-                <button class="checkout-btn" onclick="viewCart()">Checkout →</button>
+                <button class="checkout-btn" onclick="showOrderTypeModal()">Checkout →</button>
             </div>
         </div>
     </div>
@@ -604,7 +250,7 @@
                 <button onclick="toggleChat()">×</button>
             </div>
             <div id="chat-body">
-                <p class="bot-msg">Hi! I'm Quickie. Canteen is open 11 AM - 4 PM. How can I help you?</p>
+                <p class="bot-msg">Hi! I'm Quickie. Canteen is open 11 AM - 6 PM. How can I help you?</p>
             </div>
             <div class="chat-input">
                 <input type="text" id="user-input" placeholder="Ask me something...">
@@ -614,7 +260,7 @@
                 Suggestions: 
                 <button onclick="document.getElementById('user-input').value='Show menu'; sendMessage()" style="background: none; border: none; color: #d63031; cursor: pointer; font-size: 0.8rem;">Menu</button> |
                 <button onclick="document.getElementById('user-input').value='Today\'s special'; sendMessage()" style="background: none; border: none; color: #d63031; cursor: pointer; font-size: 0.8rem;">Specials</button> |
-                <button onclick="document.getElementById('user-input').value='Veg Biryani price'; sendMessage()" style="background: none; border: none; color: #d63031; cursor: pointer; font-size: 0.8rem;">Prices</button>
+                <button onclick="document.getElementById('user-input').value='Table availability'; sendMessage()" style="background: none; border: none; color: #d63031; cursor: pointer; font-size: 0.8rem;">Tables</button>
             </div>
         </div>
         <div id="chat-bubble" onclick="toggleChat()">
