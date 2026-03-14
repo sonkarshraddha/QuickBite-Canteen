@@ -180,6 +180,20 @@ app.get('/get-orders', async (req, res) => {
     }
 });
 
+// TEMPORARY: Clear all orders route (for development)
+app.delete('/clear-all-orders', async (req, res) => {
+    try {
+        const result = await Order.deleteMany({});
+        res.json({ 
+            message: "All orders cleared successfully!", 
+            deletedCount: result.deletedCount 
+        });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+
 // Start Server
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Server running on http://192.168.0.100:${PORT}`);
