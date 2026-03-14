@@ -180,8 +180,7 @@ app.get('/get-orders', async (req, res) => {
     }
 });
 
-// TEMPORARY: Clear all orders route (for development)
-app.delete('/clear-all-orders', async (req, res) => {
+app.post('/clear-all-orders', async (req, res) => {
     try {
         const result = await Order.deleteMany({});
         res.json({ 
