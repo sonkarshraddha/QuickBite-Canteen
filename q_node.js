@@ -253,3 +253,12 @@ app.listen(PORT, '0.0.0.0', () => {
     console.log(`   GET  /clear-all-orders - CLEAR ALL ORDERS ⚠️`);
     console.log(`   GET  /users - List all users`);
 });
+
+
+fetch('https://quickbite-backend-z577.onrender.com/clear-all-orders', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'}
+})
+.then(res => res.json())
+.then(data => console.log('✅ Response:', data))
+.catch(err => console.error('❌ Error:', err));
