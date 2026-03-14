@@ -186,3 +186,16 @@ app.listen(PORT, '0.0.0.0', () => {
     console.log(`📱 Access from mobile: http://192.168.0.100:${PORT}`);
     console.log(`🌐 Public URL: https://quickbite-backend-z577.onrender.com`);
 });
+
+// Add this route temporarily
+app.delete('/clear-all-orders', async (req, res) => {
+    try {
+        const result = await Order.deleteMany({});
+        res.json({ 
+            message: "All orders cleared!", 
+            deletedCount: result.deletedCount 
+        });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
