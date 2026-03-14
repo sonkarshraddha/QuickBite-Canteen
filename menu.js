@@ -620,13 +620,20 @@ function showFeedback() {
     toggleSidebar();
 }
 
+// UPDATED: Redirect to index.html (landing page) instead of a non-existent page
 function logout() {
     if (confirm('Are you sure you want to logout?')) {
+        // Clear any user session data
         localStorage.removeItem('studentName');
         localStorage.removeItem('userEmail');
         localStorage.removeItem('cart');
         localStorage.removeItem('totalPrice');
-        window.location.href = 'q_index.html';
+        localStorage.removeItem('userRole');
+        localStorage.removeItem('isLoggedIn');
+        sessionStorage.removeItem('adminAuth');
+        
+        // Redirect to landing page
+        window.location.href = 'index.html';
     }
 }
 

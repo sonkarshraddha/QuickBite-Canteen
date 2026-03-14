@@ -813,10 +813,9 @@ function resetDay() {
 
 function logout() {
     sessionStorage.removeItem('adminAuth');
-    document.getElementById('login-container').style.display = 'block';
-    document.getElementById('admin-content').style.display = 'none';
-    document.getElementById('password-input').value = '';
-    showNotification("👋 Logged out successfully!", "#636e72");
+    sessionStorage.removeItem('userRole');
+    sessionStorage.removeItem('userName');
+    window.location.href = 'index.html'; // Change from previous.html to index.html
 }
 
 // --- 6. ANALYTICS FUNCTIONS ---
