@@ -180,12 +180,14 @@ app.get('/get-orders', async (req, res) => {
     }
 });
 
-app.post('/clear-all-orders', async (req, res) => {
+// TEMPORARY: Clear all orders route (for development)
+app.get('/clear-all-orders', async (req, res) => {
     try {
         const result = await Order.deleteMany({});
         res.json({ 
             message: "All orders cleared successfully!", 
-            deletedCount: result.deletedCount 
+            deletedCount: result.deletedCount,
+            orders: result
         });
     } catch (error) {
         res.status(500).json({ message: error.message });
