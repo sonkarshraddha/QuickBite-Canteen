@@ -106,11 +106,15 @@ function confirmOrder() {
         status: 'Processing', orderId
     };
     
-    // Save to localStorage
+    // Save order to localStorage
     let orders = JSON.parse(localStorage.getItem('allOrders')) || [];
     orders.push(orderData);
     localStorage.setItem('allOrders', JSON.stringify(orders));
     localStorage.setItem('previousOrders', JSON.stringify(orders));
+    
+    // Save token for success page
+    localStorage.setItem('customToken', token);
+    localStorage.setItem('lastOrder', JSON.stringify(orderData));
     
     // Clear cart
     localStorage.removeItem('quickbite_cart');
@@ -124,39 +128,27 @@ function confirmOrder() {
     document.getElementById('success-message').classList.add('show');
     document.getElementById('main-btn').disabled = true;
     
-    // 🚀 FIXED UPI SECTION - Now with demo mode
+    // Handle UPI payment - ACTUALLY OPEN UPI APP
     if (selectedMethod === 'online') {
-        try {
-            // For demo/development - Show alert instead of crashing
-            if (confirm(`🔵 DEMO MODE\n\nIn production, this would open your UPI app.\n\nWould you like to simulate a successful payment?`)) {
-                // Option 1: Demo mode - just show success
-                setTimeout(() => window.location.href = 'success.html', 2000);
-            } else {
-                // Option 2: Try to open UPI but with a fallback
-                const upiUrl = `upi://pay?pa=quickbite@okhdfcbank&pn=QuickBite Canteen&am=${finalAmount.toFixed(2)}&tn=Order%20${orderId}&cu=INR`;
-                
-                // Create invisible iframe to attempt opening UPI
-                const iframe = document.createElement('iframe');
-                iframe.style.display = 'none';
-                iframe.src = upiUrl;
-                document.body.appendChild(iframe);
-                
-                // Fallback if UPI doesn't open
-                setTimeout(() => {
-                    document.body.removeChild(iframe);
-                    if (!document.hidden) { // If still on same page
-                        alert('⚠️ UPI app did not open.\n\nRedirecting to success page (Demo Mode)');
-                        window.location.href = 'success.html';
-                    }
-                }, 2000);
-            }
-        } catch (error) {
-            console.log('UPI Error:', error);
-            alert('⚠️ UPI payment simulation. Continuing in demo mode...');
-            setTimeout(() => window.location.href = 'success.html', 2000);
-        }
+        // Real UPI URL that will open the app
+        // Use a valid test UPI ID or your actual canteen UPI ID
+        const upiUrl = `upi://pay?pa=9999999999@paytm&pn=QuickBite%20Canteen&am=${finalAmount.toFixed(2)}&tn=Order%20${orderId}&cu=INR`;
+        
+        // Method 1: Direct redirect (works on mobile)
+        window.location.href = upiUrl;
+        
+        // Method 2: Create a link and click it (alternative)
+        // const link = document.createElement('a');
+        // link.href = upiUrl;
+        // link.click();
+        
+        // Redirect to previous orders after 3 seconds (if UPI app doesn't return)
+        setTimeout(() => {
+            window.location.href = 'previous-orders.html';
+        }, 3000);
+        
     } else {
-        // For counter payment - direct to success
-        setTimeout(() => window.location.href = 'success.html', 3000);
+        // For counter payment - direct to previous orders
+        setTimeout(() => window.location.href = 'previous-orders.html', 2000);
     }
-}this
+}
