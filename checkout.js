@@ -1,4 +1,3 @@
-// Payment method selection
 let selectedMethod = null;
 let cartItems = [];
 let orderTotal = 0;
@@ -160,4 +159,4 @@ function confirmOrder() {
         // For counter payment - direct to success
         setTimeout(() => window.location.href = 'success.html', 3000);
     }
-}
+}this
