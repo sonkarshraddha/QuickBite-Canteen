@@ -1,3 +1,4 @@
+// Payment method selection
 let selectedMethod = null;
 let cartItems = [];
 let orderTotal = 0;
@@ -106,15 +107,11 @@ function confirmOrder() {
         status: 'Processing', orderId
     };
     
-    // Save order to localStorage
+    // Save to localStorage
     let orders = JSON.parse(localStorage.getItem('allOrders')) || [];
     orders.push(orderData);
     localStorage.setItem('allOrders', JSON.stringify(orders));
     localStorage.setItem('previousOrders', JSON.stringify(orders));
-    
-    // Save token for success page
-    localStorage.setItem('customToken', token);
-    localStorage.setItem('lastOrder', JSON.stringify(orderData));
     
     // Clear cart
     localStorage.removeItem('quickbite_cart');
@@ -128,27 +125,12 @@ function confirmOrder() {
     document.getElementById('success-message').classList.add('show');
     document.getElementById('main-btn').disabled = true;
     
-    // Handle UPI payment - ACTUALLY OPEN UPI APP
+    // Handle UPI
     if (selectedMethod === 'online') {
-        // Real UPI URL that will open the app
-        // Use a valid test UPI ID or your actual canteen UPI ID
-        const upiUrl = `upi://pay?pa=9999999999@paytm&pn=QuickBite%20Canteen&am=${finalAmount.toFixed(2)}&tn=Order%20${orderId}&cu=INR`;
-        
-        // Method 1: Direct redirect (works on mobile)
+        const upiUrl = `upi://pay?pa=canteen@vp.college&pn=QuickBite&am=${finalAmount.toFixed(2)}&tn=Order%20${orderId}`;
         window.location.href = upiUrl;
-        
-        // Method 2: Create a link and click it (alternative)
-        // const link = document.createElement('a');
-        // link.href = upiUrl;
-        // link.click();
-        
-        // Redirect to previous orders after 3 seconds (if UPI app doesn't return)
-        setTimeout(() => {
-            window.location.href = 'previous-orders.html';
-        }, 3000);
-        
-    } else {
-        // For counter payment - direct to previous orders
-        setTimeout(() => window.location.href = 'previous-orders.html', 2000);
     }
+    
+    // Redirect after 3 seconds
+    setTimeout(() => window.location.href = 'previous-orders.html', 3000);
 }
