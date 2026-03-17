@@ -4,6 +4,9 @@ let cartItems = [];
 let orderTotal = 0;
 let subtotal = 0;
 
+// Backend URL
+const BACKEND_URL = 'https://quickbite-backend-z57f.onrender.com';
+
 // Load order data when page loads
 document.addEventListener('DOMContentLoaded', function() {
     loadCartData();
@@ -143,7 +146,7 @@ function updateConfirmButton() {
 }
 
 // Confirm order
-function confirmOrder() {
+async function confirmOrder() {
     // Check if canteen is open (11 AM - 6 PM)
     const now = new Date();
     const hour = now.getHours();
@@ -186,18 +189,40 @@ function confirmOrder() {
         time: new Date().toLocaleTimeString(),
         date: new Date().toLocaleDateString(),
         status: 'Processing',
-        orderId: 'ORD' + Date.now()
+        orderId: 'ORD' + Date.now(),
+        customerName: localStorage.getItem('userName') || 'Student',
+        email: localStorage.getItem('userEmail') || 'student@college.edu',
+        tableNumber: token
     };
     
-    // Save order to allOrders (for admin)
-    saveOrder(orderData);
+    try {
+        // Send order to backend server
+        const response = await fetch(`${BACKEND_URL}/place-order`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(orderData)
+        });
+        
+        if (response.ok) {
+            console.log('Order sent to server successfully');
+        } else {
+            console.log('Server error, but saving locally');
+        }
+    } catch (error) {
+        console.log('Network error - saving locally only:', error);
+    }
+    
+    // Also save locally as backup
+    saveOrderLocally(orderData);
     
     // Show success message
     showSuccessMessage(orderData);
 }
 
-// Save order to allOrders
-function saveOrder(order) {
+// Save order locally (backup)
+function saveOrderLocally(order) {
     // Get existing orders
     let allOrders = JSON.parse(localStorage.getItem('allOrders')) || [];
     
@@ -212,7 +237,7 @@ function saveOrder(order) {
     previousOrders.push(order);
     localStorage.setItem('previousOrders', JSON.stringify(previousOrders));
     
-    console.log('Order saved:', order);
+    console.log('Order saved locally:', order);
 }
 
 // Show success message and redirect
@@ -236,10 +261,17 @@ function showSuccessMessage(order) {
     localStorage.removeItem('checkout_subtotal');
     localStorage.removeItem('totalPrice');
     
-    // Redirect to previous orders page after 2 seconds
+    // Handle UPI payment
+    if (selectedMethod === 'online') {
+        // Open UPI app
+        const upiUrl = `upi://pay?pa=9999999999@paytm&pn=QuickBite&am=${order.amount.toFixed(2)}&tn=Order%20${order.orderId}&cu=INR`;
+        window.location.href = upiUrl;
+    }
+    
+    // Redirect to previous orders page after 3 seconds
     setTimeout(() => {
         window.location.href = 'previous-orders.html';
-    }, 2000);
+    }, 3000);
 }
 
 // Go back to menu
