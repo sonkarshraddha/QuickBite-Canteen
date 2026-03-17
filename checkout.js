@@ -147,11 +147,11 @@ function updateConfirmButton() {
 
 // Confirm order
 async function confirmOrder() {
-    // Check if canteen is open (11 AM - 6 PM)
+    // 🕒 UPDATED: Check if canteen is open (9 AM - 8 PM)
     const now = new Date();
     const hour = now.getHours();
-    if (hour < 11 || hour >= 18) {
-        alert('🕒 Canteen is closed! Orders can only be placed between 11 AM - 6 PM.');
+    if (hour < 9 || hour >= 20) {
+        alert('🕒 Canteen is open from 9 AM to 8 PM only.\n\nPlease place your order during working hours.');
         return;
     }
     
