@@ -104,9 +104,8 @@ function displayOrderSummary(items) {
     }
     
     // Add tax breakdown
-    const gst = subtotal * 0.05;
-    const serviceTax = 5;
-    const finalTotal = subtotal + gst + serviceTax;
+ 
+    const finalTotal = subtotal;
     
     // Update orderTotal to include taxes
     orderTotal = finalTotal;
@@ -116,14 +115,7 @@ function displayOrderSummary(items) {
             <span>Subtotal:</span>
             <span>₹${subtotal.toFixed(2)}</span>
         </div>
-        <div class="order-item" style="color: #666;">
-            <span>GST (5%):</span>
-            <span>₹${gst.toFixed(2)}</span>
-        </div>
-        <div class="order-item" style="color: #666;">
-            <span>Service Tax:</span>
-            <span>₹${serviceTax.toFixed(2)}</span>
-        </div>
+       
     `;
     
     // Update total display
@@ -189,9 +181,8 @@ function confirmOrder() {
     }
     
     // Calculate taxes
-    const gst = subtotal * 0.05;
-    const serviceTax = 5;
-    const finalAmount = subtotal + gst + serviceTax;
+    
+    const finalAmount = subtotal ;
     
     // Create order object
     const orderData = {
@@ -202,8 +193,7 @@ function confirmOrder() {
             quantity: 1
         })),
         subtotal: subtotal,
-        gst: gst,
-        serviceTax: serviceTax,
+       
         amount: finalAmount,
         method: selectedMethod,
         time: new Date().toLocaleTimeString(),
