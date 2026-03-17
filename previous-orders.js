@@ -12,9 +12,7 @@ function loadPreviousOrders() {
     
     console.log('Loaded orders:', orders); // For debugging
     displayOrders(orders);
-    
-    // Set All button as active by default
-    updateActiveFilter('All');
+    updateFilterButtons('all');
 }
 
 // Display orders in the list
@@ -78,11 +76,6 @@ function createOrderCard(order) {
         });
     }
     
-    // Calculate total with taxes if needed
-    const gst = totalAmount * 0.05;
-    const serviceTax = 5;
-    const finalTotal = totalAmount + gst + serviceTax;
-    
     return `
         <div class="order-card ${statusClass}" data-status="${order.status}">
             <div class="order-header">
@@ -102,10 +95,12 @@ function createOrderCard(order) {
             </div>
             
             <div class="order-footer">
-                <div class="time">
-                    <i class="far fa-clock"></i> ${order.time || order.paymentTime || ''}
+                <div>
+                    <span class="time">
+                        <i class="far fa-clock"></i> ${order.time || order.paymentTime || ''}
+                    </span>
                 </div>
-                <span class="total">₹${finalTotal.toFixed(2)}</span>
+                <span class="total">₹${totalAmount.toFixed(2)}</span>
             </div>
         </div>
     `;
@@ -117,13 +112,11 @@ function filterOrders(status) {
                    JSON.parse(localStorage.getItem('allOrders')) || 
                    [];
     
-    updateActiveFilter(status);
+    updateFilterButtons(status);
     
-    if (status === 'All') {
-        // Show ALL orders (both Processing and Completed)
+    if (status === 'all') {
         displayOrders(orders);
     } else {
-        // Show only orders matching the selected status
         const filteredOrders = orders.filter(order => 
             order.status && order.status.toLowerCase() === status.toLowerCase()
         );
@@ -132,17 +125,15 @@ function filterOrders(status) {
 }
 
 // Update active filter button
-function updateActiveFilter(activeStatus) {
+function updateFilterButtons(activeStatus) {
     const buttons = document.querySelectorAll('.filter-btn');
     buttons.forEach(btn => {
-        if (btn.textContent.trim() === activeStatus) {
+        const btnStatus = btn.textContent.toLowerCase();
+        if (btnStatus === activeStatus.toLowerCase() || 
+            (activeStatus === 'all' && btnStatus === 'all')) {
             btn.classList.add('active');
         } else {
             btn.classList.remove('active');
         }
     });
 }
-
-// Make functions globally available
-window.loadPreviousOrders = loadPreviousOrders;
-window.filterOrders = filterOrders;
