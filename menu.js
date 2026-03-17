@@ -285,8 +285,9 @@ function showOrderTypeModal() {
     
     const now = new Date();
     const hour = now.getHours();
-    if (hour < 9 || hour >= 20) {
-        alert('🕒 Canteen is closed! Orders can only be placed between 9 AM - 8 PM.');
+    // 🕒 UPDATED: 9 AM to 9 PM
+    if (hour < 9 || hour >= 21) {
+        alert('🕒 Canteen is closed! Orders can only be placed between 9 AM - 9 PM.');
         return;
     }
     
@@ -549,8 +550,9 @@ function logout() {
 function addToCart(itemName, price, button) {
     const now = new Date();
     const hour = now.getHours();
-    if (hour < 9 || hour >= 20) {
-        alert('🕒 Canteen is closed! Open 9 AM - 8 PM.');
+    // 🕒 UPDATED: 9 AM to 9 PM
+    if (hour < 9 || hour >= 21) {
+        alert('🕒 Canteen is closed! Open 9 AM - 9 PM.');
         return;
     }
     
@@ -691,7 +693,8 @@ function sendMessage() {
         const lowerMsg = message.toLowerCase();
         
         if (lowerMsg.includes('time') || lowerMsg.includes('open')) {
-            botMsg.textContent = "🕒 Canteen timings: 9:00 AM to 8:00 PM";
+            // 🕒 UPDATED: 9 AM to 9 PM
+            botMsg.textContent = "🕒 Canteen timings: 9:00 AM to 9:00 PM";
         }
         else if (lowerMsg.includes('table')) {
             const tables = JSON.parse(localStorage.getItem('tables')) || [];
@@ -707,7 +710,8 @@ function sendMessage() {
             botMsg.textContent = "📋 Items: ₹10-₹80. Breakfast, Meals, Chinese, Snacks, Beverages";
         }
         else {
-            botMsg.textContent = "Hi! Canteen open 9 AM - 8 PM. How can I help?";
+            // 🕒 UPDATED: 9 AM to 9 PM
+            botMsg.textContent = "Hi! Canteen open 9 AM - 9 PM. How can I help?";
         }
         
         chatBody.appendChild(botMsg);
@@ -721,8 +725,9 @@ function checkCanteenStatus() {
     const statusElement = document.getElementById('timing-info');
     
     if (statusElement) {
-        if (hour >= 9 && hour < 20) {
-            statusElement.innerHTML = '<i class="fas fa-clock"></i> Open Now: 9:00 AM - 8:00 PM <i class="fas fa-check-circle" style="color: #2ecc71;"></i>';
+        // 🕒 UPDATED: 9 AM to 9 PM
+        if (hour >= 9 && hour < 21) {
+            statusElement.innerHTML = '<i class="fas fa-clock"></i> Open Now: 9:00 AM - 9:00 PM <i class="fas fa-check-circle" style="color: #2ecc71;"></i>';
             statusElement.style.background = 'rgba(46, 204, 113, 0.2)';
         } else {
             statusElement.innerHTML = '<i class="fas fa-clock"></i> Closed: Opens at 9:00 AM <i class="fas fa-times-circle" style="color: #e74c3c;"></i>';

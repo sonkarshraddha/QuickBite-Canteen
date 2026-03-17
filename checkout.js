@@ -96,8 +96,9 @@ function updateConfirmButton() {
 async function confirmOrder() {
     const now = new Date();
     const hour = now.getHours();
-    if (hour < 9 || hour >= 20) {
-        alert('🕒 Canteen is closed! Open 9 AM - 8 PM.');
+    // 🕒 UPDATED: 9 AM to 9 PM
+    if (hour < 9 || hour >= 21) {
+        alert('🕒 Canteen is closed! Open 9 AM - 9 PM.');
         return;
     }
     
