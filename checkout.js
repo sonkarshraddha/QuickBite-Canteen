@@ -1,36 +1,19 @@
-// Payment method selection
 let selectedMethod = null;
 let cartItems = [];
 let orderTotal = 0;
 let subtotal = 0;
 
-// Backend URL
 const BACKEND_URL = 'https://quickbite-backend-z57f.onrender.com';
 
-// Load order data when page loads
 document.addEventListener('DOMContentLoaded', function() {
     loadCartData();
-    
-    // Add input listener for token field
-    document.getElementById('student-token').addEventListener('input', function() {
-        updateConfirmButton();
-    });
 });
 
-// Load cart data from localStorage
 function loadCartData() {
-    // Check multiple possible cart keys
-    cartItems = JSON.parse(localStorage.getItem('quickbite_cart')) || 
-                JSON.parse(localStorage.getItem('checkout_cart')) || 
-                [];
+    cartItems = JSON.parse(localStorage.getItem('quickbite_cart')) || [];
     
-    // Try different total keys
-    orderTotal = parseFloat(localStorage.getItem('orderTotal')) || 
-                 parseFloat(localStorage.getItem('checkout_total')) || 
-                 parseFloat(localStorage.getItem('totalPrice')) || 
-                 0;
+    orderTotal = parseFloat(localStorage.getItem('orderTotal')) || 0;
     
-    // Calculate subtotal from items if needed
     if (cartItems.length > 0 && orderTotal === 0) {
         subtotal = cartItems.reduce((sum, item) => sum + (item.price || 0), 0);
         orderTotal = subtotal;
@@ -38,57 +21,32 @@ function loadCartData() {
         subtotal = orderTotal;
     }
     
-    console.log('Loaded cart:', cartItems);
-    console.log('Total:', orderTotal);
-    
-    // Display order if items exist
     if (cartItems.length > 0) {
         displayOrderSummary(cartItems);
         document.getElementById('pay-total').textContent = orderTotal.toFixed(2);
     } else {
-        // No items found - show error and redirect
         showErrorAndRedirect();
     }
 }
 
-function showErrorAndRedirect() {
-    const summary = document.getElementById('order-summary');
-    summary.innerHTML = `
-        <h3><i class="fas fa-exclamation-triangle" style="color: #d63031;"></i> No Items Found</h3>
-        <p style="text-align: center; padding: 20px; color: #666;">
-            Your cart is empty. Redirecting to menu...
-        </p>
-    `;
-    
-    setTimeout(() => {
-        window.location.href = 'menu.html';
-    }, 2000);
-}
-
-// Display order summary - NO GST, NO Service Tax
 function displayOrderSummary(items) {
     const itemsList = document.getElementById('order-items-list');
     itemsList.innerHTML = '';
     
     let calculatedSubtotal = 0;
-    
-    // Group items by name to show quantities
     const groupedItems = {};
+    
     items.forEach(item => {
         const itemName = item.name || 'Item';
         const itemPrice = parseFloat(item.price) || 0;
         
         if (!groupedItems[itemName]) {
-            groupedItems[itemName] = {
-                count: 1,
-                price: itemPrice
-            };
+            groupedItems[itemName] = { count: 1, price: itemPrice };
         } else {
             groupedItems[itemName].count++;
         }
     });
     
-    // Display each item and calculate subtotal
     Object.entries(groupedItems).forEach(([name, data]) => {
         const itemTotal = data.price * data.count;
         calculatedSubtotal += itemTotal;
@@ -100,25 +58,17 @@ function displayOrderSummary(items) {
         `;
     });
     
-    // Use the calculated subtotal if the stored one is 0
     if (subtotal === 0 && calculatedSubtotal > 0) {
         subtotal = calculatedSubtotal;
         orderTotal = subtotal;
     }
     
-    // NO GST, NO Service Tax - just show subtotal
-    const finalTotal = subtotal;
-    orderTotal = finalTotal;
-    
-    // Update total display
-    document.getElementById('pay-total').textContent = finalTotal.toFixed(2);
+    document.getElementById('pay-total').textContent = orderTotal.toFixed(2);
 }
 
-// Select payment method
 function selectPaymentMethod(method) {
     selectedMethod = method;
     
-    // Update UI
     document.getElementById('online-option').classList.remove('selected');
     document.getElementById('counter-option').classList.remove('selected');
     
@@ -131,39 +81,28 @@ function selectPaymentMethod(method) {
     updateConfirmButton();
 }
 
-// Update confirm button state
 function updateConfirmButton() {
-    const token = document.getElementById('student-token').value.trim();
     const confirmBtn = document.getElementById('main-btn');
     
-    if (selectedMethod && token.length > 0) {
+    if (selectedMethod) {
         confirmBtn.disabled = false;
         confirmBtn.innerHTML = `<i class="fas fa-check-circle"></i> Confirm ${selectedMethod === 'online' ? 'UPI' : 'Counter'} Payment`;
     } else {
         confirmBtn.disabled = true;
-        confirmBtn.innerHTML = '<i class="fas fa-lock"></i> Enter Token & Select Payment';
+        confirmBtn.innerHTML = '<i class="fas fa-lock"></i> Select Payment Method';
     }
 }
 
-// Confirm order
 async function confirmOrder() {
-    // Check if canteen is open (11 AM - 6 PM)
     const now = new Date();
     const hour = now.getHours();
-    if (hour < 11 || hour >= 18) {
-        alert('🕒 Canteen is closed! Orders can only be placed between 11 AM - 6 PM.');
+    if (hour < 9 || hour >= 20) {
+        alert('🕒 Canteen is closed! Open 9 AM - 8 PM.');
         return;
     }
-    
-    const token = document.getElementById('student-token').value.trim();
     
     if (!selectedMethod) {
         alert('Please select a payment method');
-        return;
-    }
-    
-    if (!token) {
-        alert('Please enter your token/table number');
         return;
     }
     
@@ -172,109 +111,83 @@ async function confirmOrder() {
         return;
     }
     
-    // NO GST, NO Service Tax - just use subtotal
-    const finalAmount = subtotal;
-    
-    // Create order object
-    const orderData = {
-        token: token,
-        items: cartItems.map(item => ({
-            name: item.name || 'Item',
-            price: parseFloat(item.price) || 0,
-            quantity: 1
-        })),
-        subtotal: subtotal,
-        amount: finalAmount, // This is just subtotal (no taxes)
-        method: selectedMethod,
-        time: new Date().toLocaleTimeString(),
-        date: new Date().toLocaleDateString(),
-        status: 'Processing',
-        orderId: 'ORD' + Date.now(),
-        customerName: localStorage.getItem('userName') || 'Student',
-        email: localStorage.getItem('userEmail') || 'student@college.edu',
-        tableNumber: token
-    };
-    
-    try {
-        // Send order to backend server
-        const response = await fetch(`${BACKEND_URL}/place-order`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(orderData)
-        });
-        
-        if (response.ok) {
-            console.log('Order sent to server successfully');
-        } else {
-            console.log('Server error, but saving locally');
-        }
-    } catch (error) {
-        console.log('Network error - saving locally only:', error);
+    // Get the most recent order from previousOrders
+    let previousOrders = JSON.parse(localStorage.getItem('previousOrders')) || [];
+    if (previousOrders.length === 0) {
+        alert('No order found! Please go back to menu.');
+        return;
     }
     
-    // Also save locally as backup
-    saveOrderLocally(orderData);
+    const latestOrder = previousOrders[previousOrders.length - 1];
     
-    // Show success message
-    showSuccessMessage(orderData);
-}
-
-// Save order locally (backup)
-function saveOrderLocally(order) {
-    // Get existing orders
-    let allOrders = JSON.parse(localStorage.getItem('allOrders')) || [];
+    // Update payment method in the order
+    latestOrder.method = selectedMethod;
+    latestOrder.paymentTime = new Date().toLocaleTimeString();
+    latestOrder.paymentDate = new Date().toLocaleDateString();
     
-    // Add new order
-    allOrders.push(order);
-    
-    // Save to allOrders
-    localStorage.setItem('allOrders', JSON.stringify(allOrders));
-    
-    // Also save to previousOrders for user view
-    let previousOrders = JSON.parse(localStorage.getItem('previousOrders')) || [];
-    previousOrders.push(order);
+    // Save updated order
     localStorage.setItem('previousOrders', JSON.stringify(previousOrders));
     
-    console.log('Order saved locally:', order);
+    // Also update allOrders
+    let allOrders = JSON.parse(localStorage.getItem('allOrders')) || [];
+    const orderIndex = allOrders.findIndex(o => o.token === latestOrder.token);
+    if (orderIndex !== -1) {
+        allOrders[orderIndex].method = selectedMethod;
+        allOrders[orderIndex].paymentTime = latestOrder.paymentTime;
+        localStorage.setItem('allOrders', JSON.stringify(allOrders));
+    }
+    
+    console.log('Payment confirmed for order:', latestOrder);
+    
+    // Clear cart
+    localStorage.removeItem('quickbite_cart');
+    localStorage.removeItem('orderTotal');
+    localStorage.removeItem('totalPrice');
+    
+    // Show success message
+    showSuccessMessage(latestOrder);
 }
 
-// Show success message and redirect
 function showSuccessMessage(order) {
     const successMsg = document.getElementById('success-message');
+    
+    let displayText = '';
+    if (order.orderType === 'dinein' && order.tableNumber) {
+        displayText = `Table ${order.tableNumber} | Token: ${order.token}`;
+    } else {
+        displayText = order.token;
+    }
+    
     successMsg.innerHTML = `
-        <i class="fas fa-check-circle"></i> Order Confirmed!<br>
-        <small>Token #${order.token} | Total: ₹${order.amount.toFixed(2)}</small>
+        <i class="fas fa-check-circle"></i> Payment Successful!<br>
+        <small>${displayText} | Total: ₹${order.amount.toFixed(2)}</small>
     `;
     successMsg.classList.add('show');
     
-    // Disable confirm button
     document.getElementById('main-btn').disabled = true;
     
-    // Clear cart from localStorage (check all possible keys)
-    localStorage.removeItem('quickbite_cart');
-    localStorage.removeItem('checkout_cart');
-    localStorage.removeItem('canteenCart');
-    localStorage.removeItem('orderTotal');
-    localStorage.removeItem('checkout_total');
-    localStorage.removeItem('checkout_subtotal');
-    localStorage.removeItem('totalPrice');
-    
-    // Handle UPI payment
     if (selectedMethod === 'online') {
-        // Open UPI app
-        const upiUrl = `upi://pay?pa=9999999999@paytm&pn=QuickBite&am=${order.amount.toFixed(2)}&tn=Order%20${order.orderId}&cu=INR`;
+        const upiUrl = `upi://pay?pa=9999999999@paytm&pn=QuickBite&am=${order.amount.toFixed(2)}&tn=Order%20${order.orderId || order.token}&cu=INR`;
         window.location.href = upiUrl;
     }
     
-    // Redirect to previous orders page after 3 seconds
-    setTimeout(() => {
-        window.location.href = 'previous-orders.html';
-    }, 3000);
+    setTimeout(() => window.location.href = 'previous-orders.html', 3000);
 }
 
-// Go back to menu
+function showErrorAndRedirect() {
+    const summary = document.getElementById('order-summary');
+    summary.innerHTML = `
+        <h3><i class="fas fa-exclamation-triangle" style="color: #d63031;"></i> No Items Found</h3>
+        <p style="text-align: center; padding: 20px; color: #666;">Your cart is empty. Redirecting...</p>
+    `;
+    
+    setTimeout(() => window.location.href = 'menu.html', 2000);
+}
+
 function goBackToMenu() {
     window.location.href = 'menu.html';
 }
+
+window.selectPaymentMethod = selectPaymentMethod;
+window.confirmOrder = confirmOrder;
+window.goBackToMenu = goBackToMenu;
