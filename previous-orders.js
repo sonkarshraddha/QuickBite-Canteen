@@ -12,7 +12,6 @@ function loadPreviousOrders() {
     
     console.log('Loaded orders:', orders); // For debugging
     displayOrders(orders);
-    updateFilterButtons('all');
 }
 
 // Display orders in the list
@@ -112,28 +111,32 @@ function filterOrders(status) {
                    JSON.parse(localStorage.getItem('allOrders')) || 
                    [];
     
-    updateFilterButtons(status);
+    // Update active button
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.textContent.includes(status)) {
+            btn.classList.add('active');
+        }
+    });
     
-    if (status === 'all') {
-        displayOrders(orders);
+    // Filter and display
+    const filteredOrders = orders.filter(order => 
+        order.status && order.status.toLowerCase() === status.toLowerCase()
+    );
+    
+    if (filteredOrders.length === 0) {
+        document.getElementById('orders-list').innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-filter"></i>
+                <h3>No ${status} orders</h3>
+                <p>Check back later or try another filter</p>
+            </div>
+        `;
     } else {
-        const filteredOrders = orders.filter(order => 
-            order.status && order.status.toLowerCase() === status.toLowerCase()
-        );
         displayOrders(filteredOrders);
     }
 }
 
-// Update active filter button
-function updateFilterButtons(activeStatus) {
-    const buttons = document.querySelectorAll('.filter-btn');
-    buttons.forEach(btn => {
-        const btnStatus = btn.textContent.toLowerCase();
-        if (btnStatus === activeStatus.toLowerCase() || 
-            (activeStatus === 'all' && btnStatus === 'all')) {
-            btn.classList.add('active');
-        } else {
-            btn.classList.remove('active');
-        }
-    });
-}
+// Make functions globally available
+window.loadPreviousOrders = loadPreviousOrders;
+window.filterOrders = filterOrders;
