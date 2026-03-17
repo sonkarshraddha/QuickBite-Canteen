@@ -62,7 +62,7 @@ function showErrorAndRedirect() {
     }, 2000);
 }
 
-// Display order summary
+// Display order summary - NO GST, NO Service Tax
 function displayOrderSummary(items) {
     const itemsList = document.getElementById('order-items-list');
     itemsList.innerHTML = '';
@@ -103,20 +103,9 @@ function displayOrderSummary(items) {
         orderTotal = subtotal;
     }
     
-    // Add tax breakdown
- 
+    // NO GST, NO Service Tax - just show subtotal
     const finalTotal = subtotal;
-    
-    // Update orderTotal to include taxes
     orderTotal = finalTotal;
-    
-    itemsList.innerHTML += `
-        <div class="order-item" style="color: #666; border-top: 1px dashed #ddd; margin-top: 10px; padding-top: 10px;">
-            <span>Subtotal:</span>
-            <span>₹${subtotal.toFixed(2)}</span>
-        </div>
-       
-    `;
     
     // Update total display
     document.getElementById('pay-total').textContent = finalTotal.toFixed(2);
@@ -180,9 +169,8 @@ function confirmOrder() {
         return;
     }
     
-    // Calculate taxes
-    
-    const finalAmount = subtotal ;
+    // NO GST, NO Service Tax - just use subtotal
+    const finalAmount = subtotal;
     
     // Create order object
     const orderData = {
@@ -193,8 +181,7 @@ function confirmOrder() {
             quantity: 1
         })),
         subtotal: subtotal,
-       
-        amount: finalAmount,
+        amount: finalAmount, // This is just subtotal (no taxes)
         method: selectedMethod,
         time: new Date().toLocaleTimeString(),
         date: new Date().toLocaleDateString(),
