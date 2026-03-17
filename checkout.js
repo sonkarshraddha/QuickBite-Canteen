@@ -4,133 +4,268 @@ let cartItems = [];
 let orderTotal = 0;
 let subtotal = 0;
 
-// Backend URL
-const BACKEND_URL = 'https://quickbite-backend-z57f.onrender.com';
-
 // Load order data when page loads
 document.addEventListener('DOMContentLoaded', function() {
     loadCartData();
-    document.getElementById('student-token').addEventListener('input', updateConfirmButton);
+    
+    // Add input listener for token field
+    document.getElementById('student-token').addEventListener('input', function() {
+        updateConfirmButton();
+    });
 });
 
+// Load cart data from localStorage
 function loadCartData() {
-    cartItems = JSON.parse(localStorage.getItem('quickbite_cart')) || [];
-    orderTotal = parseFloat(localStorage.getItem('orderTotal')) || 0;
-    subtotal = orderTotal;
+    // Check multiple possible cart keys
+    cartItems = JSON.parse(localStorage.getItem('quickbite_cart')) || 
+                JSON.parse(localStorage.getItem('checkout_cart')) || 
+                [];
     
+    // Try different total keys
+    orderTotal = parseFloat(localStorage.getItem('orderTotal')) || 
+                 parseFloat(localStorage.getItem('checkout_total')) || 
+                 parseFloat(localStorage.getItem('totalPrice')) || 
+                 0;
+    
+    // Calculate subtotal from items if needed
+    if (cartItems.length > 0 && orderTotal === 0) {
+        subtotal = cartItems.reduce((sum, item) => sum + (item.price || 0), 0);
+        orderTotal = subtotal;
+    } else {
+        subtotal = orderTotal;
+    }
+    
+    console.log('Loaded cart:', cartItems);
+    console.log('Total:', orderTotal);
+    
+    // Display order if items exist
     if (cartItems.length > 0) {
         displayOrderSummary(cartItems);
         document.getElementById('pay-total').textContent = orderTotal.toFixed(2);
     } else {
+        // No items found - show error and redirect
         showErrorAndRedirect();
     }
 }
 
 function showErrorAndRedirect() {
-    document.getElementById('order-summary').innerHTML = `
+    const summary = document.getElementById('order-summary');
+    summary.innerHTML = `
         <h3><i class="fas fa-exclamation-triangle" style="color: #d63031;"></i> No Items Found</h3>
-        <p style="text-align: center; padding: 20px; color: #666;">Your cart is empty. Redirecting to menu...</p>
+        <p style="text-align: center; padding: 20px; color: #666;">
+            Your cart is empty. Redirecting to menu...
+        </p>
     `;
-    setTimeout(() => window.location.href = 'menu.html', 2000);
+    
+    setTimeout(() => {
+        window.location.href = 'menu.html';
+    }, 2000);
 }
 
+// Display order summary
 function displayOrderSummary(items) {
     const itemsList = document.getElementById('order-items-list');
     itemsList.innerHTML = '';
     
+    let calculatedSubtotal = 0;
+    
+    // Group items by name to show quantities
+    const groupedItems = {};
     items.forEach(item => {
+        const itemName = item.name || 'Item';
+        const itemPrice = parseFloat(item.price) || 0;
+        
+        if (!groupedItems[itemName]) {
+            groupedItems[itemName] = {
+                count: 1,
+                price: itemPrice
+            };
+        } else {
+            groupedItems[itemName].count++;
+        }
+    });
+    
+    // Display each item and calculate subtotal
+    Object.entries(groupedItems).forEach(([name, data]) => {
+        const itemTotal = data.price * data.count;
+        calculatedSubtotal += itemTotal;
         itemsList.innerHTML += `
             <div class="order-item">
-                <span>${item.name} x1</span>
-                <span>₹${item.price}</span>
+                <span>${name} x${data.count}</span>
+                <span>₹${itemTotal.toFixed(2)}</span>
             </div>
         `;
     });
     
+    // Use the calculated subtotal if the stored one is 0
+    if (subtotal === 0 && calculatedSubtotal > 0) {
+        subtotal = calculatedSubtotal;
+        orderTotal = subtotal;
+    }
+    
+    // Add tax breakdown
     const gst = subtotal * 0.05;
     const serviceTax = 5;
     const finalTotal = subtotal + gst + serviceTax;
     
+    // Update orderTotal to include taxes
+    orderTotal = finalTotal;
+    
     itemsList.innerHTML += `
         <div class="order-item" style="color: #666; border-top: 1px dashed #ddd; margin-top: 10px; padding-top: 10px;">
-            <span>Subtotal:</span> <span>₹${subtotal.toFixed(2)}</span>
+            <span>Subtotal:</span>
+            <span>₹${subtotal.toFixed(2)}</span>
         </div>
         <div class="order-item" style="color: #666;">
-            <span>GST (5%):</span> <span>₹${gst.toFixed(2)}</span>
+            <span>GST (5%):</span>
+            <span>₹${gst.toFixed(2)}</span>
         </div>
         <div class="order-item" style="color: #666;">
-            <span>Service Tax:</span> <span>₹5.00</span>
+            <span>Service Tax:</span>
+            <span>₹${serviceTax.toFixed(2)}</span>
         </div>
     `;
     
+    // Update total display
     document.getElementById('pay-total').textContent = finalTotal.toFixed(2);
 }
 
+// Select payment method
 function selectPaymentMethod(method) {
     selectedMethod = method;
+    
+    // Update UI
     document.getElementById('online-option').classList.remove('selected');
     document.getElementById('counter-option').classList.remove('selected');
-    document.getElementById(method === 'online' ? 'online-option' : 'counter-option').classList.add('selected');
+    
+    if (method === 'online') {
+        document.getElementById('online-option').classList.add('selected');
+    } else {
+        document.getElementById('counter-option').classList.add('selected');
+    }
+    
     updateConfirmButton();
 }
 
+// Update confirm button state
 function updateConfirmButton() {
     const token = document.getElementById('student-token').value.trim();
-    const btn = document.getElementById('main-btn');
+    const confirmBtn = document.getElementById('main-btn');
     
-    if (selectedMethod && token) {
-        btn.disabled = false;
-        btn.innerHTML = `<i class="fas fa-check-circle"></i> Confirm ${selectedMethod === 'online' ? 'UPI' : 'Counter'} Payment`;
+    if (selectedMethod && token.length > 0) {
+        confirmBtn.disabled = false;
+        confirmBtn.innerHTML = `<i class="fas fa-check-circle"></i> Confirm ${selectedMethod === 'online' ? 'UPI' : 'Counter'} Payment`;
     } else {
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fas fa-lock"></i> Enter Token & Select Payment';
+        confirmBtn.disabled = true;
+        confirmBtn.innerHTML = '<i class="fas fa-lock"></i> Enter Token & Select Payment';
     }
 }
 
+// Confirm order
 function confirmOrder() {
+    // Check if canteen is open (11 AM - 6 PM)
+    const now = new Date();
+    const hour = now.getHours();
+    if (hour < 11 || hour >= 18) {
+        alert('🕒 Canteen is closed! Orders can only be placed between 11 AM - 6 PM.');
+        return;
+    }
+    
     const token = document.getElementById('student-token').value.trim();
     
-    if (!selectedMethod) { alert('Please select a payment method'); return; }
-    if (!token) { alert('Please enter token/table number'); return; }
-    if (cartItems.length === 0) { alert('No items in cart!'); return; }
-
+    if (!selectedMethod) {
+        alert('Please select a payment method');
+        return;
+    }
+    
+    if (!token) {
+        alert('Please enter your token/table number');
+        return;
+    }
+    
+    if (cartItems.length === 0) {
+        alert('No items in cart!');
+        return;
+    }
+    
+    // Calculate taxes
     const gst = subtotal * 0.05;
     const serviceTax = 5;
     const finalAmount = subtotal + gst + serviceTax;
-    const orderId = 'ORD' + Date.now();
     
+    // Create order object
     const orderData = {
-        token, items: cartItems, subtotal, gst, serviceTax,
-        amount: finalAmount, method: selectedMethod,
+        token: token,
+        items: cartItems.map(item => ({
+            name: item.name || 'Item',
+            price: parseFloat(item.price) || 0,
+            quantity: 1
+        })),
+        subtotal: subtotal,
+        gst: gst,
+        serviceTax: serviceTax,
+        amount: finalAmount,
+        method: selectedMethod,
         time: new Date().toLocaleTimeString(),
         date: new Date().toLocaleDateString(),
-        status: 'Processing', orderId
+        status: 'Processing',
+        orderId: 'ORD' + Date.now()
     };
     
-    // Save to localStorage
-    let orders = JSON.parse(localStorage.getItem('allOrders')) || [];
-    orders.push(orderData);
-    localStorage.setItem('allOrders', JSON.stringify(orders));
-    localStorage.setItem('previousOrders', JSON.stringify(orders));
-    
-    // Clear cart
-    localStorage.removeItem('quickbite_cart');
-    localStorage.removeItem('orderTotal');
+    // Save order to allOrders (for admin)
+    saveOrder(orderData);
     
     // Show success message
-    document.getElementById('success-message').innerHTML = `
+    showSuccessMessage(orderData);
+}
+
+// Save order to allOrders
+function saveOrder(order) {
+    // Get existing orders
+    let allOrders = JSON.parse(localStorage.getItem('allOrders')) || [];
+    
+    // Add new order
+    allOrders.push(order);
+    
+    // Save to allOrders
+    localStorage.setItem('allOrders', JSON.stringify(allOrders));
+    
+    // Also save to previousOrders for user view
+    let previousOrders = JSON.parse(localStorage.getItem('previousOrders')) || [];
+    previousOrders.push(order);
+    localStorage.setItem('previousOrders', JSON.stringify(previousOrders));
+    
+    console.log('Order saved:', order);
+}
+
+// Show success message and redirect
+function showSuccessMessage(order) {
+    const successMsg = document.getElementById('success-message');
+    successMsg.innerHTML = `
         <i class="fas fa-check-circle"></i> Order Confirmed!<br>
-        <small>Token #${token} | Total: ₹${finalAmount.toFixed(2)}</small>
+        <small>Token #${order.token} | Total: ₹${order.amount.toFixed(2)}</small>
     `;
-    document.getElementById('success-message').classList.add('show');
+    successMsg.classList.add('show');
+    
+    // Disable confirm button
     document.getElementById('main-btn').disabled = true;
     
-    // Handle UPI
-    if (selectedMethod === 'online') {
-        const upiUrl = `upi://pay?pa=canteen@vp.college&pn=QuickBite&am=${finalAmount.toFixed(2)}&tn=Order%20${orderId}`;
-        window.location.href = upiUrl;
-    }
+    // Clear cart from localStorage (check all possible keys)
+    localStorage.removeItem('quickbite_cart');
+    localStorage.removeItem('checkout_cart');
+    localStorage.removeItem('canteenCart');
+    localStorage.removeItem('orderTotal');
+    localStorage.removeItem('checkout_total');
+    localStorage.removeItem('checkout_subtotal');
+    localStorage.removeItem('totalPrice');
     
-    // Redirect after 3 seconds
-    setTimeout(() => window.location.href = 'previous-orders.html', 3000);
+    // Redirect to previous orders page after 2 seconds
+    setTimeout(() => {
+        window.location.href = 'previous-orders.html';
+    }, 2000);
+}
+
+// Go back to menu
+function goBackToMenu() {
+    window.location.href = 'menu.html';
 }
