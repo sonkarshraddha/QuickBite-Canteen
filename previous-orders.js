@@ -1,21 +1,17 @@
-// Load previous orders when page loads
 document.addEventListener('DOMContentLoaded', function() {
     loadPreviousOrders();
 });
 
-// Load all previous orders
 function loadPreviousOrders() {
-    // Try to get orders from multiple possible storage keys
     let orders = JSON.parse(localStorage.getItem('previousOrders')) || 
                  JSON.parse(localStorage.getItem('allOrders')) || 
                  [];
     
-    console.log('Loaded orders:', orders); // For debugging
+    console.log('Loaded orders:', orders);
     displayOrders(orders);
     updateFilterButtons('all');
 }
 
-// Display orders in the list
 function displayOrders(orders) {
     const ordersList = document.getElementById('orders-list');
     
@@ -30,59 +26,81 @@ function displayOrders(orders) {
         return;
     }
     
-    // Sort by date (newest first)
-    orders.sort((a, b) => new Date(b.date) - new Date(a.date));
-    
+    orders.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
     ordersList.innerHTML = orders.map(order => createOrderCard(order)).join('');
 }
 
-// Create HTML for a single order card
 function createOrderCard(order) {
-    const statusClass = order.status === 'Processing' ? 'processing' : 
-                       (order.status === 'Pending' ? 'processing' : 'completed');
+    const orderStatus = order.status || 'Processing';
+    
+    let statusClass = '';
+    let statusIcon = '';
+    
+    if (orderStatus === 'Processing') {
+        statusClass = 'processing';
+        statusIcon = '⏳';
+    } else if (orderStatus === 'Ready') {
+        statusClass = 'ready';
+        statusIcon = '🔵';
+    } else if (orderStatus === 'Completed') {
+        statusClass = 'completed';
+        statusIcon = '✅';
+    } else {
+        statusClass = 'processing';
+        statusIcon = '⏳';
+    }
     
     const paymentClass = order.method === 'online' ? 'online' : 'counter';
     const paymentIcon = order.method === 'online' ? '📱' : '💵';
-    const statusIcon = order.status === 'Processing' || order.status === 'Pending' ? '⏳' : '✅';
+    const totalAmount = order.amount || 0;
     
-    // Get the total amount - check multiple possible keys
-    const totalAmount = order.amount || order.totalAmount || order.total || 0;
+    console.log('Creating card for order:', order);
     
-    // Create items list HTML
     let itemsList = '';
     if (order.items && order.items.length > 0) {
-        // Group items by name
-        const itemCounts = {};
         order.items.forEach(item => {
-            const itemName = item.name || 'Item';
-            if (!itemCounts[itemName]) {
-                itemCounts[itemName] = {
-                    count: 1,
-                    price: item.price || 0
-                };
-            } else {
-                itemCounts[itemName].count++;
-            }
-        });
-        
-        // Generate HTML for each item
-        Object.entries(itemCounts).forEach(([name, data]) => {
             itemsList += `
                 <div class="order-item">
-                    <span>${name} x${data.count}</span>
-                    <span>₹${(data.price * data.count).toFixed(2)}</span>
+                    <span>${item.name} x${item.quantity || 1}</span>
+                    <span>₹${((item.price || 0) * (item.quantity || 1)).toFixed(2)}</span>
                 </div>
             `;
         });
     }
     
+    // FIXED: Check for dine-in order
+    const isDineIn = order.orderType === 'dinein' && order.tableNumber !== null && order.tableNumber !== undefined;
+    
+    let identifierHtml = '';
+    
+    if (isDineIn) {
+        // DINE-IN: Show table number with token below
+        identifierHtml = `
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+                <span class="table-identifier ${statusClass}">
+                    <i class="fas fa-chair"></i> Table ${order.tableNumber}
+                </span>
+                <span class="token-identifier ${statusClass}" style="font-size: 0.85rem;">
+                    <i class="fas fa-ticket-alt"></i> ${order.token}
+                </span>
+            </div>
+        `;
+    } else {
+        // TAKEAWAY: Show only token
+        identifierHtml = `
+            <span class="token-identifier ${statusClass}">
+                <i class="fas fa-ticket-alt"></i> ${order.token || 'TK-N/A'}
+            </span>
+        `;
+    }
+    
     return `
-        <div class="order-card ${statusClass}" data-status="${order.status}">
+        <div class="order-card ${statusClass}">
             <div class="order-header">
-                <span class="token">#${order.token || 'N/A'}</span>
+                ${identifierHtml}
                 <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
                     <span class="status-badge ${statusClass}">
-                        ${statusIcon} ${order.status || 'Pending'}
+                        ${statusIcon} ${orderStatus}
                     </span>
                     <span class="payment-method ${paymentClass}">
                         ${paymentIcon} ${order.method === 'online' ? 'UPI' : 'Counter'}
@@ -97,7 +115,7 @@ function createOrderCard(order) {
             <div class="order-footer">
                 <div>
                     <span class="time">
-                        <i class="far fa-clock"></i> ${order.time || order.paymentTime || ''}
+                        <i class="far fa-clock"></i> ${order.time || ''}
                     </span>
                 </div>
                 <span class="total">₹${totalAmount.toFixed(2)}</span>
@@ -106,7 +124,6 @@ function createOrderCard(order) {
     `;
 }
 
-// Filter orders by status
 function filterOrders(status) {
     const orders = JSON.parse(localStorage.getItem('previousOrders')) || 
                    JSON.parse(localStorage.getItem('allOrders')) || 
@@ -117,14 +134,19 @@ function filterOrders(status) {
     if (status === 'all') {
         displayOrders(orders);
     } else {
-        const filteredOrders = orders.filter(order => 
-            order.status && order.status.toLowerCase() === status.toLowerCase()
-        );
+        const filteredOrders = orders.filter(order => {
+            const orderStatus = order.status || 'Processing';
+            if (status === 'Processing') {
+                return orderStatus === 'Processing' || orderStatus === 'Ready';
+            } else if (status === 'Completed') {
+                return orderStatus === 'Completed';
+            }
+            return false;
+        });
         displayOrders(filteredOrders);
     }
 }
 
-// Update active filter button
 function updateFilterButtons(activeStatus) {
     const buttons = document.querySelectorAll('.filter-btn');
     buttons.forEach(btn => {
@@ -137,3 +159,15 @@ function updateFilterButtons(activeStatus) {
         }
     });
 }
+
+function clearAllOrders() {
+    if (confirm('Clear all order history?')) {
+        localStorage.removeItem('previousOrders');
+        localStorage.removeItem('allOrders');
+        loadPreviousOrders();
+    }
+}
+
+window.loadPreviousOrders = loadPreviousOrders;
+window.filterOrders = filterOrders;
+window.clearAllOrders = clearAllOrders;
