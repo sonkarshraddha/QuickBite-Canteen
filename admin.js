@@ -1,14 +1,22 @@
-// Backend URL
-const BASE_URL = 'https://quickbite-backend-z57f.onrender.com';
+// --- 1. ACCESS CONTROL ---
+function checkPassword() {
+    const password = document.getElementById('password-input').value;
+    if (password === "admin123") {
+        sessionStorage.setItem('adminAuth', 'true');
+        document.getElementById('login-container').style.display = 'none';
+        document.getElementById('admin-content').style.display = 'block';
+        loadData();
+        showNotification("✅ Login successful!", "#27ae60");
+    } else {
+        alert("❌ Incorrect password!");
+    }
+}
 
-let allOrders = [];
-let currentFilter = 'all';
-let currentMenuSection = 'live-orders';
-
-// Check admin access on page load
-document.addEventListener('DOMContentLoaded', function() {
-    checkAccess();
-});
+function handleKeyPress(e) {
+    if (e.key === 'Enter') {
+        checkPassword();
+    }
+}
 
 function checkAccess() {
     const auth = sessionStorage.getItem('adminAuth');
@@ -16,398 +24,319 @@ function checkAccess() {
         document.getElementById('login-container').style.display = 'none';
         document.getElementById('admin-content').style.display = 'block';
         loadData();
-        startAutoRefresh();
     } else {
-        document.getElementById('login-container').style.display = 'flex';
+        document.getElementById('login-container').style.display = 'block';
         document.getElementById('admin-content').style.display = 'none';
     }
 }
 
-function checkPassword() {
-    const password = document.getElementById('password-input').value;
-    if (password === 'admin123') { // You can change this password
-        sessionStorage.setItem('adminAuth', 'true');
-        checkAccess();
-    } else {
-        alert('Incorrect password!');
+// --- 2. DATA HANDLING from localStorage ---
+let currentFilter = 'all';
+
+function loadData() {
+    // Get orders from allOrders (single source of truth)
+    const orders = JSON.parse(localStorage.getItem('allOrders')) || [];
+    
+    // Also update previousOrders to keep them in sync
+    syncPreviousOrders(orders);
+    
+    displayOrders(orders);
+    updateStats(orders);
+}
+
+// Sync allOrders with previousOrders
+function syncPreviousOrders(orders) {
+    localStorage.setItem('previousOrders', JSON.stringify(orders));
+}
+
+function displayOrders(orders) {
+    const activeTable = document.getElementById('active-orders');
+    const paymentTable = document.getElementById('payment-logs');
+    
+    activeTable.innerHTML = "";
+    paymentTable.innerHTML = "";
+
+    if (orders.length === 0) {
+        activeTable.innerHTML = `<tr><td colspan="7" class="empty-state"><i class="fas fa-coffee"></i><br>No orders yet</td></tr>`;
+        paymentTable.innerHTML = `<tr><td colspan="6" class="empty-state"><i class="fas fa-credit-card"></i><br>No payment history</td></tr>`;
+        return;
+    }
+
+    // Filter orders based on current filter
+    let filteredOrders = orders;
+    if (currentFilter !== 'all') {
+        filteredOrders = orders.filter(order => order.status === currentFilter);
+    }
+
+    // Display filtered orders in kitchen table
+    filteredOrders.forEach((order, index) => {
+        const itemsText = formatItems(order.items);
+        const orderTime = order.time || order.paymentTime || new Date().toLocaleTimeString();
+        const statusClass = getStatusClass(order.status);
+        
+        // ✅ FIX: Get the correct amount - check multiple possible keys
+        const amount = getOrderAmount(order);
+        
+        activeTable.innerHTML += `
+            <tr>
+                <td><span class="token-badge">#${order.token || 'TK' + (index+1)}</span></td>
+                <td>${itemsText}</td>
+                <td><b>₹${amount}</b></td>
+                <td>${orderTime}</td>
+                <td><span class="method-tag ${order.method === 'online' ? 'upi' : 'cash'}">
+                    ${order.method === 'online' ? '📱 UPI' : '💵 CASH'}
+                </span></td>
+                <td><span class="status-badge ${statusClass}">${order.status || 'Processing'}</span></td>
+                <td class="action-btns">
+                    ${getActionButtons(order, index)}
+                </td>
+            </tr>
+        `;
+    });
+
+    // Display all orders in payment history
+    orders.forEach((order, index) => {
+        const itemsText = formatItems(order.items);
+        const orderTime = order.time || order.paymentTime || new Date().toLocaleTimeString();
+        const statusClass = getStatusClass(order.status);
+        
+        // ✅ FIX: Get the correct amount - check multiple possible keys
+        const amount = getOrderAmount(order);
+        
+        paymentTable.innerHTML += `
+            <tr>
+                <td><span class="token-badge">#${order.token || 'TK' + (index+1)}</span></td>
+                <td>${itemsText}</td>
+                <td><b>₹${amount}</b></td>
+                <td><span class="method-tag ${order.method === 'online' ? 'upi' : 'cash'}">
+                    ${order.method === 'online' ? '📱 UPI' : '💵 CASH'}
+                </span></td>
+                <td>${orderTime}</td>
+                <td><span class="status-badge ${statusClass}">${order.status || 'Processing'}</span></td>
+            </tr>
+        `;
+    });
+}
+
+// ✅ NEW FUNCTION: Get amount from order checking all possible keys
+function getOrderAmount(order) {
+    // Try all possible keys where amount might be stored
+    const possibleAmounts = [
+        order.amount,
+        order.totalAmount,
+        order.total,
+        order.finalAmount,
+        order.payAmount,
+        order.subtotal ? order.subtotal + (order.gst || 0) + (order.serviceTax || 0) : null
+    ];
+    
+    // Find the first valid number
+    for (let amount of possibleAmounts) {
+        if (amount !== undefined && amount !== null && !isNaN(amount) && parseFloat(amount) > 0) {
+            return parseFloat(amount).toFixed(2);
+        }
+    }
+    
+    // If no amount found, try to calculate from items
+    if (order.items && order.items.length > 0) {
+        const calculatedTotal = order.items.reduce((sum, item) => {
+            const price = item.price || 0;
+            const qty = item.quantity || 1;
+            return sum + (price * qty);
+        }, 0);
+        
+        if (calculatedTotal > 0) {
+            return calculatedTotal.toFixed(2);
+        }
+    }
+    
+    return "0.00";
+}
+
+function formatItems(items) {
+    if (!items || items.length === 0) return "Order items";
+    
+    return items.map(item => {
+        if (typeof item === 'object') {
+            const itemName = item.name || 'Item';
+            const quantity = item.quantity || 1;
+            return `${itemName} (x${quantity})`;
+        }
+        return item;
+    }).join(", ");
+}
+
+function getStatusClass(status) {
+    switch(status) {
+        case 'Processing': return 'status-processing';
+        case 'Ready': return 'status-ready';
+        case 'Completed': return 'status-completed';
+        default: return 'status-processing';
     }
 }
 
-function handleKeyPress(event) {
-    if (event.key === 'Enter') {
-        checkPassword();
+function getActionButtons(order, index) {
+    if (order.status === 'Completed') {
+        return `<button class="ready-btn" disabled>✓ Completed</button>`;
+    } else if (order.status === 'Ready') {
+        return `
+            <button class="complete-btn" onclick="markCompleted(${index})">
+                <i class="fas fa-check-double"></i> Complete
+            </button>
+        `;
+    } else {
+        return `
+            <button class="ready-btn" onclick="markReady(${index})">
+                <i class="fas fa-check"></i> Mark Ready
+            </button>
+        `;
+    }
+}
+
+function updateStats(orders) {
+    let revenue = 0;
+    let processingCount = 0;
+    let readyCount = 0;
+    
+    orders.forEach(order => {
+        // ✅ FIX: Use the same amount function for revenue calculation
+        const amount = parseFloat(getOrderAmount(order)) || 0;
+        revenue += amount;
+        
+        if (order.status === 'Processing') {
+            processingCount++;
+        } else if (order.status === 'Ready') {
+            readyCount++;
+        }
+    });
+
+    document.getElementById('stat-count').innerText = processingCount;
+    document.getElementById('ready-count').innerText = readyCount;
+    document.getElementById('stat-revenue').innerText = "₹" + revenue.toFixed(2);
+    document.getElementById('total-orders').innerText = orders.length;
+}
+
+function markReady(index) {
+    let orders = JSON.parse(localStorage.getItem('allOrders')) || [];
+    
+    if (orders[index]) {
+        // Update status to Ready
+        orders[index].status = 'Ready';
+        orders[index].readyTime = new Date().toLocaleTimeString();
+        orders[index].readyDate = new Date().toLocaleDateString();
+        
+        // Save back to localStorage
+        localStorage.setItem('allOrders', JSON.stringify(orders));
+        
+        // Sync with previousOrders
+        localStorage.setItem('previousOrders', JSON.stringify(orders));
+        
+        // Refresh display
+        loadData();
+        
+        // Show notification
+        const amount = getOrderAmount(orders[index]);
+        showNotification(`✅ Order #${orders[index].token} (₹${amount}) is ready for pickup!`, "#3498db");
+    }
+}
+
+function markCompleted(index) {
+    let orders = JSON.parse(localStorage.getItem('allOrders')) || [];
+    
+    if (orders[index]) {
+        // Update status to Completed
+        orders[index].status = 'Completed';
+        orders[index].completedTime = new Date().toLocaleTimeString();
+        orders[index].completedDate = new Date().toLocaleDateString();
+        
+        // Save back to localStorage
+        localStorage.setItem('allOrders', JSON.stringify(orders));
+        
+        // Sync with previousOrders
+        localStorage.setItem('previousOrders', JSON.stringify(orders));
+        
+        // Refresh display
+        loadData();
+        
+        // Show notification
+        const amount = getOrderAmount(orders[index]);
+        showNotification(`✅ Order #${orders[index].token} (₹${amount}) completed!`, "#27ae60");
+    }
+}
+
+function filterOrders(filter) {
+    currentFilter = filter;
+    
+    // Update active tab
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.textContent.toLowerCase().includes(filter.toLowerCase()) || 
+            (filter === 'all' && btn.textContent.includes('All'))) {
+            btn.classList.add('active');
+        }
+    });
+    
+    loadData(); // Reload with filter
+}
+
+function resetDay() {
+    if(confirm("⚠️ Delete all order history for today?")) {
+        localStorage.removeItem('allOrders');
+        localStorage.removeItem('previousOrders');
+        loadData();
+        showNotification("✅ All orders cleared!", "#27ae60");
     }
 }
 
 function logout() {
     sessionStorage.removeItem('adminAuth');
-    location.reload();
+    document.getElementById('login-container').style.display = 'block';
+    document.getElementById('admin-content').style.display = 'none';
+    document.getElementById('password-input').value = '';
+    showNotification("👋 Logged out successfully!", "#636e72");
 }
 
-function startAutoRefresh() {
-    // Refresh every 10 seconds
-    setInterval(loadData, 10000);
+function showNotification(message, color) {
+    const notification = document.createElement('div');
+    notification.className = 'notification';
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: ${color};
+        color: white;
+        padding: 15px 25px;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        z-index: 9999;
+        animation: slideIn 0.3s ease;
+    `;
+    notification.innerHTML = `<i class="fas fa-info-circle"></i> ${message}`;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
 }
 
-// Load all orders from backend
-async function loadData() {
-    try {
-        const response = await fetch(`${BASE_URL}/get-orders`);
-        if (!response.ok) {
-            throw new Error('Failed to fetch orders');
+// Add CSS animation
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
         }
-        
-        allOrders = await response.json();
-        console.log('Orders loaded from server:', allOrders);
-        
-        updateStats();
-        displayOrders();
-        displayPaymentHistory();
-        
-    } catch (error) {
-        console.error('Error loading orders:', error);
-        // Fallback to localStorage if server fails
-        loadLocalData();
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
     }
-}
+`;
+document.head.appendChild(style);
 
-// Fallback to localStorage if server is down
-function loadLocalData() {
-    const localOrders = JSON.parse(localStorage.getItem('allOrders')) || 
-                        JSON.parse(localStorage.getItem('previousOrders')) || 
-                        [];
-    
-    if (localOrders.length > 0) {
-        allOrders = localOrders;
-        console.log('Using local orders as fallback:', allOrders);
-        updateStats();
-        displayOrders();
-        displayPaymentHistory();
-    } else {
-        showEmptyState();
-    }
-}
-
-function showEmptyState() {
-    document.getElementById('active-orders').innerHTML = `
-        <tr>
-            <td colspan="7" style="text-align: center; padding: 40px;">
-                <i class="fas fa-receipt" style="font-size: 48px; color: #ccc; margin-bottom: 15px; display: block;"></i>
-                <p style="color: #666; font-size: 16px;">No orders yet</p>
-                <p style="color: #999; font-size: 14px;">Orders will appear here when customers place them</p>
-            </td>
-        </tr>
-    `;
-    
-    document.getElementById('payment-logs').innerHTML = `
-        <tr>
-            <td colspan="6" style="text-align: center; padding: 40px;">
-                <i class="fas fa-credit-card" style="font-size: 48px; color: #ccc; margin-bottom: 15px; display: block;"></i>
-                <p style="color: #666; font-size: 16px;">No payment history</p>
-            </td>
-        </tr>
-    `;
-}
-
-function updateStats() {
-    const processingOrders = allOrders.filter(o => o.status === 'Processing' || o.status === 'Pending').length;
-    const readyOrders = allOrders.filter(o => o.status === 'Ready').length;
-    const totalOrders = allOrders.length;
-    
-    // Calculate today's revenue
-    const today = new Date().toLocaleDateString();
-    const todayOrders = allOrders.filter(o => o.date === today);
-    const todayRevenue = todayOrders.reduce((sum, o) => sum + (parseFloat(o.amount) || 0), 0);
-    
-    document.getElementById('stat-count').textContent = processingOrders;
-    document.getElementById('ready-count').textContent = readyOrders;
-    document.getElementById('stat-revenue').textContent = `₹${todayRevenue.toFixed(2)}`;
-    document.getElementById('total-orders').textContent = totalOrders;
-}
-
-function displayOrders() {
-    const tbody = document.getElementById('active-orders');
-    tbody.innerHTML = '';
-    
-    // Filter orders based on current filter
-    let filteredOrders = allOrders;
-    if (currentFilter !== 'all') {
-        filteredOrders = allOrders.filter(o => o.status === currentFilter);
-    }
-    
-    // Show only non-completed orders by default, or all if filter is active
-    if (currentFilter === 'all') {
-        filteredOrders = filteredOrders.filter(o => o.status !== 'Completed');
-    }
-    
-    if (filteredOrders.length === 0) {
-        tbody.innerHTML = `
-            <tr>
-                <td colspan="7" style="text-align: center; padding: 30px;">
-                    <i class="fas fa-check-circle" style="font-size: 36px; color: #27ae60; margin-bottom: 10px; display: block;"></i>
-                    <p style="color: #666;">No ${currentFilter === 'all' ? 'active' : currentFilter} orders</p>
-                </td>
-            </tr>
-        `;
-        return;
-    }
-    
-    filteredOrders.forEach((order, index) => {
-        // Format items for display
-        const itemsText = order.items && order.items.length > 0
-            ? order.items.map(item => `${item.name || 'Item'} x${item.quantity || 1}`).join(', ')
-            : 'No items';
-        
-        // Determine status class
-        const statusClass = order.status === 'Ready' ? 'status-ready' : 
-                           (order.status === 'Completed' ? 'status-completed' : 'status-processing');
-        
-        // Payment method display
-        const methodClass = order.method === 'online' ? 'method-upi' : 'method-cash';
-        const methodText = order.method === 'online' ? '📱 UPI' : '💵 Cash';
-        
-        tbody.innerHTML += `
-            <tr class="order-row ${order.status === 'Ready' ? 'ready-row' : ''}">
-                <td><span class="token-badge">#${order.token || order.tableNumber || index + 1}</span></td>
-                <td class="items-cell" title="${itemsText}">${itemsText.substring(0, 30)}${itemsText.length > 30 ? '...' : ''}</td>
-                <td><span class="amount">₹${(parseFloat(order.amount) || 0).toFixed(2)}</span></td>
-                <td><span class="time"><i class="far fa-clock"></i> ${order.time || ''}</span></td>
-                <td><span class="payment-badge ${methodClass}">${methodText}</span></td>
-                <td>
-                    <span class="status-badge ${statusClass}">
-                        ${order.status === 'Ready' ? '✅ Ready' : 
-                          order.status === 'Completed' ? '✓ Completed' : '⏳ Processing'}
-                    </span>
-                </td>
-                <td class="action-buttons">
-                    ${order.status !== 'Completed' ? `
-                        <button class="action-btn ready-btn" onclick="markAsReady('${order._id || index}')" 
-                                ${order.status === 'Ready' ? 'disabled' : ''}>
-                            <i class="fas fa-check"></i> Ready
-                        </button>
-                        <button class="action-btn complete-btn" onclick="markAsCompleted('${order._id || index}')">
-                            <i class="fas fa-check-double"></i> Complete
-                        </button>
-                    ` : `
-                        <span class="completed-label">✓ Done</span>
-                    `}
-                </td>
-            </tr>
-        `;
-    });
-}
-
-function displayPaymentHistory() {
-    const tbody = document.getElementById('payment-logs');
-    tbody.innerHTML = '';
-    
-    // Show all orders in payment history (including completed)
-    const completedOrders = allOrders.filter(o => o.status === 'Completed');
-    
-    if (completedOrders.length === 0) {
-        tbody.innerHTML = `
-            <tr>
-                <td colspan="6" style="text-align: center; padding: 30px;">
-                    <i class="fas fa-receipt" style="font-size: 36px; color: #ccc; margin-bottom: 10px; display: block;"></i>
-                    <p style="color: #666;">No completed orders yet</p>
-                </td>
-            </tr>
-        `;
-        return;
-    }
-    
-    completedOrders.forEach(order => {
-        const itemsText = order.items && order.items.length > 0
-            ? order.items.map(item => `${item.name || 'Item'}`).join(', ')
-            : 'No items';
-        
-        const methodClass = order.method === 'online' ? 'method-upi' : 'method-cash';
-        const methodText = order.method === 'online' ? '📱 UPI' : '💵 Cash';
-        
-        tbody.innerHTML += `
-            <tr>
-                <td><span class="token-badge">#${order.token || order.tableNumber || 'N/A'}</span></td>
-                <td class="items-cell" title="${itemsText}">${itemsText.substring(0, 25)}${itemsText.length > 25 ? '...' : ''}</td>
-                <td><span class="amount">₹${(parseFloat(order.amount) || 0).toFixed(2)}</span></td>
-                <td><span class="payment-badge ${methodClass}">${methodText}</span></td>
-                <td><span class="time"><i class="far fa-clock"></i> ${order.time || ''}</span></td>
-                <td><span class="status-badge status-completed">✓ Completed</span></td>
-            </tr>
-        `;
-    });
-}
-
-// Filter orders by status
-function filterOrders(status) {
-    currentFilter = status;
-    
-    // Update tab buttons
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.classList.remove('active');
-    });
-    event.target.classList.add('active');
-    
-    displayOrders();
-}
-
-// Mark order as ready
-async function markAsReady(orderId) {
-    // For now, just update locally
-    updateOrderStatus(orderId, 'Ready');
-    
-    // TODO: Add API call to update on server
-    // await fetch(`${BASE_URL}/update-order/${orderId}`, {
-    //     method: 'PUT',
-    //     headers: { 'Content-Type': 'application/json' },
-    //     body: JSON.stringify({ status: 'Ready' })
-    // });
-}
-
-// Mark order as completed
-async function markAsCompleted(orderId) {
-    updateOrderStatus(orderId, 'Completed');
-}
-
-function updateOrderStatus(orderId, newStatus) {
-    // Find and update the order
-    const orderIndex = allOrders.findIndex(o => o._id === orderId || o.orderId === orderId);
-    if (orderIndex !== -1) {
-        allOrders[orderIndex].status = newStatus;
-        
-        // Update localStorage
-        localStorage.setItem('allOrders', JSON.stringify(allOrders));
-        localStorage.setItem('previousOrders', JSON.stringify(allOrders));
-        
-        // Refresh displays
-        updateStats();
-        displayOrders();
-        displayPaymentHistory();
-    }
-}
-
-// Reset day's orders
-function resetDay() {
-    if (confirm('Are you sure you want to reset all orders? This cannot be undone.')) {
-        allOrders = [];
-        localStorage.removeItem('allOrders');
-        localStorage.removeItem('previousOrders');
-        updateStats();
-        displayOrders();
-        displayPaymentHistory();
-    }
-}
-
-// Navigation functions
-function showDashboard() {
-    document.getElementById('live-orders-section').style.display = 'block';
-    document.getElementById('menu-management-section').style.display = 'none';
-    document.getElementById('table-management-section').style.display = 'none';
-    document.getElementById('analytics-section').style.display = 'none';
-    document.getElementById('regular-users-section').style.display = 'none';
-    
-    // Update active menu item
-    document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('active'));
-    document.querySelector('.menu-item[onclick="showDashboard()"]').classList.add('active');
-}
-
-function showMenuManagement() {
-    document.getElementById('live-orders-section').style.display = 'none';
-    document.getElementById('menu-management-section').style.display = 'block';
-    document.getElementById('table-management-section').style.display = 'none';
-    document.getElementById('analytics-section').style.display = 'none';
-    document.getElementById('regular-users-section').style.display = 'none';
-    
-    document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('active'));
-    document.querySelector('.menu-item[onclick="showMenuManagement()"]').classList.add('active');
-}
-
-function showTableManagement() {
-    document.getElementById('live-orders-section').style.display = 'none';
-    document.getElementById('menu-management-section').style.display = 'none';
-    document.getElementById('table-management-section').style.display = 'block';
-    document.getElementById('analytics-section').style.display = 'none';
-    document.getElementById('regular-users-section').style.display = 'none';
-    
-    document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('active'));
-    document.querySelector('.menu-item[onclick="showTableManagement()"]').classList.add('active');
-}
-
-function showDailyAnalytics() {
-    document.getElementById('live-orders-section').style.display = 'none';
-    document.getElementById('menu-management-section').style.display = 'none';
-    document.getElementById('table-management-section').style.display = 'none';
-    document.getElementById('analytics-section').style.display = 'block';
-    document.getElementById('regular-users-section').style.display = 'none';
-    
-    document.getElementById('analytics-title').innerHTML = '<i class="fas fa-chart-bar"></i> Daily Report';
-    document.getElementById('current-date-range').textContent = 'Today';
-    
-    document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('active'));
-    document.querySelector('.menu-item[onclick="showDailyAnalytics()"]').classList.add('active');
-}
-
-function showWeeklyAnalytics() {
-    document.getElementById('live-orders-section').style.display = 'none';
-    document.getElementById('menu-management-section').style.display = 'none';
-    document.getElementById('table-management-section').style.display = 'none';
-    document.getElementById('analytics-section').style.display = 'block';
-    document.getElementById('regular-users-section').style.display = 'none';
-    
-    document.getElementById('analytics-title').innerHTML = '<i class="fas fa-chart-bar"></i> Weekly Report';
-    document.getElementById('current-date-range').textContent = 'This Week';
-    
-    document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('active'));
-    document.querySelector('.menu-item[onclick="showWeeklyAnalytics()"]').classList.add('active');
-}
-
-function showMonthlyAnalytics() {
-    document.getElementById('live-orders-section').style.display = 'none';
-    document.getElementById('menu-management-section').style.display = 'none';
-    document.getElementById('table-management-section').style.display = 'none';
-    document.getElementById('analytics-section').style.display = 'block';
-    document.getElementById('regular-users-section').style.display = 'none';
-    
-    document.getElementById('analytics-title').innerHTML = '<i class="fas fa-chart-bar"></i> Monthly Report';
-    document.getElementById('current-date-range').textContent = 'This Month';
-    
-    document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('active'));
-    document.querySelector('.menu-item[onclick="showMonthlyAnalytics()"]').classList.add('active');
-}
-
-function showRegularUsers() {
-    document.getElementById('live-orders-section').style.display = 'none';
-    document.getElementById('menu-management-section').style.display = 'none';
-    document.getElementById('table-management-section').style.display = 'none';
-    document.getElementById('analytics-section').style.display = 'none';
-    document.getElementById('regular-users-section').style.display = 'block';
-    
-    document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('active'));
-    document.querySelector('.menu-item[onclick="showRegularUsers()"]').classList.add('active');
-}
-
-function goToDashboard() {
-    showDashboard();
-}
-
-function toggleSidebar() {
-    document.getElementById('admin-sidebar').classList.toggle('active');
-    document.getElementById('sidebar-overlay').classList.toggle('active');
-}
-
-// Make functions globally available
-window.checkPassword = checkPassword;
-window.handleKeyPress = handleKeyPress;
-window.logout = logout;
-window.filterOrders = filterOrders;
-window.markAsReady = markAsReady;
-window.markAsCompleted = markAsCompleted;
-window.resetDay = resetDay;
-window.showDashboard = showDashboard;
-window.showMenuManagement = showMenuManagement;
-window.showTableManagement = showTableManagement;
-window.showDailyAnalytics = showDailyAnalytics;
-window.showWeeklyAnalytics = showWeeklyAnalytics;
-window.showMonthlyAnalytics = showMonthlyAnalytics;
-window.showRegularUsers = showRegularUsers;
-window.goToDashboard = goToDashboard;
-window.toggleSidebar = toggleSidebar;
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    checkAccess();
+    setInterval(loadData, 2000); // Refresh every 2 seconds
+});
